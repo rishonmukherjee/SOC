@@ -1,13 +1,6 @@
 import { useState } from 'react';
 import {
-  LayoutDashboard,
-  ShieldAlert,
-  ShieldCheck,
-  FileCheck2,
-  ScrollText,
-  Activity,
-  Bell,
-  Search,
+  LayoutDashboard,ShieldAlert,ShieldCheck,FileCheck2,ScrollText,Activity,Bell, Search,
 } from 'lucide-react';
 
 const navItems = [
@@ -24,7 +17,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex bg-black">
-      {/* Sidebar */}
+      {/* Sidebar cuh*/}
       <aside className="w-64 bg-black text-gray-400 flex flex-col border-r border-gray-800">
         <div className="h-16 flex items-center px-6 border-b border-gray-800">
           <span className="text-lg font-bold text-white">Compliance</span>
@@ -55,9 +48,9 @@ function App() {
         </div>
       </aside>
 
-      {/* Right side */}
+      {/* Right cuh */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
+        
         <header className="h-16 bg-black border-b border-gray-800 flex items-center justify-between px-6">
           <h1 className="text-lg font-semibold text-white">{active}</h1>
 
@@ -77,7 +70,7 @@ function App() {
           </div>
         </header>
 
-        {/* Main Content */}
+        {/* Main cuh */}
         <main className="flex-1 p-6 overflow-y-auto bg-black">
           <div className="bg-black rounded-xl border border-gray-500 p-6 min-h-[60vh] flex items-center justify-center text-gray-500">
             {active} content goes here
