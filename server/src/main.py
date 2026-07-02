@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers import auth, risks, controls
+from fastapi.staticfiles import StaticFiles
+from src.routers import auth, risks, controls, evidence
 
 app = FastAPI(title="ComplianceOS API")
 
@@ -17,6 +18,12 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1/auth")
 app.include_router(risks.router, prefix="/api/v1/risks")
 app.include_router(controls.router, prefix="/api/v1/controls")
+app.include_router(evidence.router, prefix="/api/v1")
+
+import os
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def read_root():
