@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS evidence (
     CHECK(status IN ('Pending Review','Approved','Rejected','Needs Resubmission')),
   uploaded_by TEXT REFERENCES users(id),
   reviewed_by TEXT REFERENCES users(id),
+  rejection_reason TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -66,6 +67,14 @@ CREATE TABLE IF NOT EXISTS consent_log (
   purpose TEXT NOT NULL,
   consent_status TEXT NOT NULL CHECK(consent_status IN ('Given','Withdrawn','Pending')),
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Control Dependencies (Control <-> Control relation)
+CREATE TABLE IF NOT EXISTS control_dependencies (
+  source_control_id TEXT REFERENCES controls(id),
+  related_control_id TEXT REFERENCES controls(id),
+  relationship TEXT NOT NULL CHECK(relationship IN ('supplements', 'depends_on', 'replaces')),
+  PRIMARY KEY (source_control_id, related_control_id)
 );
 
 -- Activity Log (auto-written by middleware, never by routes directly)
