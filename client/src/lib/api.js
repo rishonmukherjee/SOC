@@ -125,6 +125,26 @@ export async function updateControl(id, data) {
   return res.json();
 }
 
+export async function linkControlDependency(controlId, relatedControlId, relationship) {
+  const res = await fetch(`${BASE_URL}/controls/${controlId}/link-dependency`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ related_control_id: relatedControlId, relationship }),
+  });
+  return res.json();
+}
+
+export async function unlinkControlDependency(controlId, relatedControlId) {
+  const res = await fetch(`${BASE_URL}/controls/${controlId}/link-dependency/${relatedControlId}`, {
+    method: "DELETE",
+    headers: { ...getAuthHeaders() },
+  });
+  return res.json();
+}
+
 // ─── Evidence ─────────────────────────────────────────────────────────────────
 
 export async function getEvidence() {

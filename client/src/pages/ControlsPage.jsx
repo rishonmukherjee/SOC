@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Filter } from "lucide-react";
 import Table from "../components/Table";
 import Badge from "../components/Badge";
-import { getControls, updateControl } from "../lib/api";
+import { getControls, updateControl, linkControlDependency, unlinkControlDependency } from "../lib/api";
 import { useRole } from "../hooks/useRole";
 
 const ownerNames = {
@@ -19,11 +19,18 @@ function ControlsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Modal states for linking controls
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [sourceControlId, setSourceControlId] = useState("");
+  const [targetControlId, setTargetControlId] = useState("");
+  const [relationship, setRelationship] = useState("supplements");
+
   const columns = [
     "Control",
     "Trust Criteria",
     "Status",
     "Owner",
+    "Related Controls",
   ];
 
   async function fetchControls() {
@@ -57,6 +64,32 @@ function ControlsPage() {
       fetchControls(); // Refresh
     } catch (err) {
       alert("Failed to assign control: " + err.message);
+    }
+  };
+
+  const handleLinkDependency = async (e) => {
+    e.preventDefault();
+    if (!sourceControlId || !targetControlId || sourceControlId === targetControlId) {
+      alert("Invalid controls selected");
+      return;
+    }
+    try {
+      await linkControlDependency(sourceControlId, targetControlId, relationship);
+      setIsLinkModalOpen(false);
+      setTargetControlId("");
+      fetchControls();
+    } catch (err) {
+      alert("Failed to link controls: " + err.message);
+    }
+  };
+
+  const handleUnlinkDependency = async (controlId, relatedId) => {
+    if (!confirm("Are you sure you want to remove this control link?")) return;
+    try {
+      await unlinkControlDependency(controlId, relatedId);
+      fetchControls();
+    } catch (err) {
+      alert("Failed to unlink controls: " + err.message);
     }
   };
 
@@ -185,10 +218,129 @@ function ControlsPage() {
                     ownerNames[control.owner_id] || control.owner_id
                   )}
                 </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    {control.dependencies && control.dependencies.map((dep) => (
+                      <span
+                        key={dep.related_control_id}
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium border ${
+                          dep.relationship === "supplements"
+                            ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                            : dep.relationship === "depends_on"
+                            ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                            : "bg-gray-500/10 border-gray-500/20 text-gray-400"
+                        }`}
+                      >
+                        <span>
+                          {dep.relationship === "supplements" ? "Supplements: " : "Depends on: "}
+                          {dep.related_control_id}
+                        </span>
+                        {(role === "admin" || role === "owner") && (
+                          <button
+                            onClick={() => handleUnlinkDependency(control.id, dep.related_control_id)}
+                            className="hover:text-red-400 text-gray-500 font-bold ml-1 focus:outline-none cursor-pointer"
+                          >
+                            &times;
+                          </button>
+                        )}
+                      </span>
+                    ))}
+                    {(role === "admin" || role === "owner") && (
+                      <button
+                        onClick={() => {
+                          setSourceControlId(control.id);
+                          setIsLinkModalOpen(true);
+                        }}
+                        className="text-[10px] text-blue-400 hover:text-blue-300 border border-dashed border-gray-800 hover:border-gray-700 px-2 py-0.5 rounded-full transition-all cursor-pointer"
+                      >
+                        + Link
+                      </button>
+                    )}
+                  </div>
+                </td>
               </tr>
             ))
           )}
         </Table>
+      )}
+
+      {/* Link Control Dependency Modal */}
+      {isLinkModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Link Related Control
+            </h3>
+            <form onSubmit={handleLinkDependency} className="space-y-4">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-gray-400 font-medium mb-1.5">
+                  Source Control
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={controls.find(c => c.id === sourceControlId)?.name || sourceControlId}
+                  className="w-full px-3 py-2 rounded-lg bg-black/50 border border-gray-800 text-gray-400 text-sm focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-gray-400 font-medium mb-1.5">
+                  Related Control
+                </label>
+                <select
+                  required
+                  value={targetControlId}
+                  onChange={(e) => setTargetControlId(e.target.value)}
+                  className="w-full bg-black border border-gray-800 text-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="">Select a control...</option>
+                  {controls
+                    .filter((c) => c.id !== sourceControlId && !controls.find(s => s.id === sourceControlId)?.dependencies?.some(d => d.related_control_id === c.id))
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.id} - {c.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-gray-400 font-medium mb-1.5">
+                  Relationship Type
+                </label>
+                <select
+                  value={relationship}
+                  onChange={(e) => setRelationship(e.target.value)}
+                  className="w-full bg-black border border-gray-800 text-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 cursor-pointer"
+                >
+                  <option value="supplements">Supplements (adds security value)</option>
+                  <option value="depends_on">Depends On (prerequisite)</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLinkModalOpen(false);
+                    setTargetControlId("");
+                  }}
+                  className="px-4 py-2 border border-gray-800 hover:border-gray-700 text-gray-300 rounded-lg text-sm transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm transition-all shadow-lg shadow-blue-900/20 cursor-pointer"
+                >
+                  Link Controls
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
