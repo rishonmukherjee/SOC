@@ -248,8 +248,13 @@ function EvidencePage() {
                           <X size={16} />
                         </button>
                       </div>
+                    ) : item.status === "Pending Review" ? (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-gray-400 text-xs font-medium">Awaiting Auditor Review</span>
+                        <span className="text-gray-500 text-[10px]">Switch to Auditor role in header to review</span>
+                      </div>
                     ) : (
-                      <span className="text-gray-500 text-xs">No actions available</span>
+                      <span className="text-gray-600 text-xs">—</span>
                     )}
                   </td>
                 </tr>
