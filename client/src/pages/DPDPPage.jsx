@@ -284,7 +284,9 @@ function DPDPPage() {
                         <option value="">Unassigned</option>
                         <option value="user-admin">Priya Sharma (Admin)</option>
                         <option value="user-owner">Arjun Mehta (Owner)</option>
-                        <option value="user-auditor">Meera Iyer (Auditor)</option>
+                        {req.request_type !== "Erasure" && (
+                          <option value="user-auditor">Meera Iyer (Auditor)</option>
+                        )}
                       </select>
                     ) : (
                       ownerNames[req.assigned_to] || req.assigned_to || "Unassigned"

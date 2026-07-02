@@ -105,6 +105,15 @@ def update_dpdp_request(
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided to update")
 
+    if "assigned_to" in update_data and update_data["assigned_to"] is not None:
+        assignee = db.execute("SELECT role FROM users WHERE id = ?", (update_data["assigned_to"],)).fetchone()
+        if not assignee:
+            raise HTTPException(status_code=400, detail="Invalid assigned user")
+        
+        req_type = db.execute("SELECT request_type FROM dpdp_requests WHERE id = ?", (request_id,)).fetchone()
+        if req_type and req_type["request_type"] == "Erasure" and assignee["role"] == "auditor":
+            raise HTTPException(status_code=400, detail="Auditors cannot be assigned to data deletion (Erasure) requests")
+
     set_clauses = []
     params = []
     for key, value in update_data.items():
