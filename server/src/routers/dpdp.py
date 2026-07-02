@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from src.db.database import get_db
 from src.dependencies import get_current_user, User
+from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
@@ -80,6 +81,7 @@ def log_dpdp_request(
             """,
             (request_id, req.request_type, req.data_principal_name, req.received_on, sla_due)
         )
+        log_activity(db, "DPDP Request", request_id, f"Logged new {req.request_type} request for {req.data_principal_name}", user.id, user.name)
         db.commit()
         
         cursor = db.execute("SELECT * FROM dpdp_requests WHERE id = ?", (request_id,))
@@ -117,6 +119,8 @@ def update_dpdp_request(
         cursor = db.execute(query, params)
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Request not found")
+            
+        log_activity(db, "DPDP Request", request_id, "Updated DPDP request", user.id, user.name)
         db.commit()
         
         cursor = db.execute("SELECT * FROM dpdp_requests WHERE id = ?", (request_id,))
@@ -159,6 +163,7 @@ def log_consent(
             """,
             (log_id, req.data_principal_name, req.purpose, req.consent_status)
         )
+        log_activity(db, "Consent Log", log_id, f"Logged consent status '{req.consent_status}' for {req.data_principal_name}", user.id, user.name)
         db.commit()
         
         cursor = db.execute("SELECT * FROM consent_log WHERE id = ?", (log_id,))

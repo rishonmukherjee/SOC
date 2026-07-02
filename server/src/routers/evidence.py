@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 
 from src.db.database import get_db
 from src.dependencies import get_current_user, User
+from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
@@ -89,6 +90,7 @@ def upload_evidence(
             """,
             (evidence_id, control_id, file_url_or_text, user.id)
         )
+        log_activity(db, "Evidence", evidence_id, f"Uploaded evidence for Control {control_id}", user.id, user.name)
         db.commit()
         
         cursor = db.execute("SELECT * FROM evidence WHERE id = ?", (evidence_id,))
@@ -120,6 +122,8 @@ def review_evidence(
         )
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Evidence not found")
+            
+        log_activity(db, "Evidence", evidence_id, f"Reviewed evidence: {req.status}", user.id, user.name)
         db.commit()
         
         cursor = db.execute("SELECT * FROM evidence WHERE id = ?", (evidence_id,))

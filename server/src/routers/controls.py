@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from src.db.database import get_db
 from src.dependencies import get_current_user, User
+from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
@@ -114,6 +115,8 @@ def update_control(
         cursor = db.execute(query, params)
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Control not found")
+            
+        log_activity(db, "Control", control_id, "Updated Control", user.id, user.name)
         db.commit()
         
         cursor = db.execute("SELECT * FROM controls WHERE id = ?", (control_id,))

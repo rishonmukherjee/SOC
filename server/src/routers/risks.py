@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from src.db.database import get_db
 from src.dependencies import get_current_user, User
+from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
@@ -77,6 +78,7 @@ def create_risk(
             """,
             (risk_id, risk.title, risk.description, risk.likelihood, risk.impact)
         )
+        log_activity(db, "Risk", risk_id, f"Created Risk: {risk.title}", user.id, user.name)
         db.commit()
         
         # Fetch the created risk to return it (gets the auto-calculated score and defaults)
@@ -139,6 +141,8 @@ def update_risk(
         cursor = db.execute(query, params)
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Risk not found")
+            
+        log_activity(db, "Risk", risk_id, "Updated Risk", user.id, user.name)
         db.commit()
         
         cursor = db.execute("SELECT * FROM risks WHERE id = ?", (risk_id,))
