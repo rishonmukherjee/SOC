@@ -4,3 +4,4 @@ dist-ssr
 .env
 .DS_Store
 *.log
+WORK_DIVISION.md
