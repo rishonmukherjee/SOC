@@ -47,6 +47,9 @@ function ActivityLogPage() {
 
     const matchesModule =
       moduleFilter === "All Modules" ||
+      (moduleFilter === "DPDP" &&
+        (log.entity_type.toLowerCase().includes("dpdp") ||
+         log.entity_type.toLowerCase().includes("consent"))) ||
       log.entity_type.toLowerCase() === moduleFilter.toLowerCase();
 
     return matchesSearch && matchesModule;
