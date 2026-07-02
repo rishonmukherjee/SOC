@@ -218,9 +218,13 @@ function EvidencePage() {
                     <div className="flex flex-col gap-1">
                       <Badge status={item.status} />
                       {item.rejection_reason && (
-                        <span className="text-[10px] text-red-400 max-w-[150px] truncate block" title={item.rejection_reason}>
+                        <button
+                          onClick={() => alert(`Evidence Rejection Reason:\n\n"${item.rejection_reason}"`)}
+                          className="text-[10px] text-red-400 hover:text-red-300 max-w-[150px] truncate block text-left underline decoration-dotted cursor-pointer"
+                          title="Click to view full rejection reason"
+                        >
                           {item.rejection_reason}
-                        </span>
+                        </button>
                       )}
                     </div>
                   </td>

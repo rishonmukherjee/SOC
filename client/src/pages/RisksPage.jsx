@@ -6,6 +6,19 @@ import Modal from "../components/Modal";
 import CreateRiskForm from "../components/Createrisk";
 import { getRisks, createRisk } from "../lib/api";
 
+const InfoTooltip = ({ text }) => {
+  return (
+    <span className="relative group inline-block ml-1.5 cursor-help align-middle">
+      <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-gray-700 hover:border-gray-500 text-[10px] text-gray-500 hover:text-gray-300 transition-colors select-none font-sans font-normal">
+        i
+      </span>
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-y-1/2 mb-2 w-48 scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-150 origin-bottom bg-gray-950 border border-gray-800 text-gray-300 text-[11px] leading-normal p-2.5 rounded-lg shadow-xl z-50 text-center font-normal normal-case">
+        {text}
+      </span>
+    </span>
+  );
+};
+
 function RisksPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -16,9 +29,18 @@ function RisksPage() {
 
   const columns = [
     "Risk",
-    "Likelihood",
-    "Impact",
-    "Score",
+    <span className="flex items-center" key="likelihood">
+      Likelihood
+      <InfoTooltip text="Probability of the risk event occurring, from 1 (Rare) to 5 (Almost Certain)." />
+    </span>,
+    <span className="flex items-center" key="impact">
+      Impact
+      <InfoTooltip text="Potential damage to compliance or security if the event occurs, from 1 (Negligible) to 5 (Critical)." />
+    </span>,
+    <span className="flex items-center" key="score">
+      Score
+      <InfoTooltip text="Risk Rating (Likelihood × Impact). Critical: 20-25, Medium: 8-14, Low: 1-7." />
+    </span>,
     "Status",
   ];
 

@@ -29,6 +29,12 @@ function DPDPPage() {
   // Modals
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [consentModalOpen, setConsentModalOpen] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
+
+  const displayRequests = requests.filter((req) => {
+    if (showCompleted) return true;
+    return req.status !== "Completed";
+  });
 
   // New Request Form
   const [reqForm, setReqForm] = useState({
@@ -176,6 +182,27 @@ function DPDPPage() {
         </button>
       </div>
 
+      {/* Filters & Toggles */}
+      {activeTab === "requests" && (
+        <div className="flex items-center justify-between bg-gray-900/30 p-4 rounded-xl border border-gray-800/60 backdrop-blur-sm">
+          <div className="text-sm text-gray-400">
+            Showing <span className="text-white font-medium">{displayRequests.length}</span> active requests
+          </div>
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showCompleted}
+              onChange={(e) => setShowCompleted(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="relative w-9 h-5 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-gray-500 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white peer-checked:after:border-transparent"></div>
+            <span className="text-xs font-medium text-gray-300 peer-checked:text-white">
+              Show Completed Requests
+            </span>
+          </label>
+        </div>
+      )}
+
       {/* Loading & Error States */}
       {loading ? (
         <div className="flex h-[40vh] items-center justify-center">
@@ -187,17 +214,29 @@ function DPDPPage() {
         </div>
       ) : activeTab === "requests" ? (
         <Table columns={["Name", "Type", "Status", "Received On", "SLA Due", "Days Left", "Assigned To"]}>
-          {requests.length === 0 ? (
+          {displayRequests.length === 0 ? (
             <tr>
               <td colSpan={7} className="px-6 py-8 text-center text-gray-500 text-sm">
                 No data principal requests recorded.
               </td>
             </tr>
           ) : (
-            requests.map((req) => {
+            displayRequests.map((req) => {
               const daysLeft = getDaysLeft(req.sla_due);
+
+              let rowColorClass = "border-t border-gray-800 hover:bg-gray-800/30 transition-colors";
+              if (req.status !== "Completed") {
+                if (daysLeft <= 5) {
+                  rowColorClass = "border-t border-gray-800 bg-red-950/25 hover:bg-red-950/35 transition-colors";
+                } else if (daysLeft <= 15) {
+                  rowColorClass = "border-t border-gray-800 bg-yellow-950/20 hover:bg-yellow-950/30 transition-colors";
+                } else {
+                  rowColorClass = "border-t border-gray-800 bg-green-950/15 hover:bg-green-950/25 transition-colors";
+                }
+              }
+
               return (
-                <tr key={req.id} className="border-t border-gray-800 hover:bg-gray-800/30 transition-colors">
+                <tr key={req.id} className={rowColorClass}>
                   <td className="px-6 py-4 text-white font-medium">{req.data_principal_name}</td>
                   <td className="px-6 py-4 text-gray-300">{req.request_type}</td>
                   <td className="px-6 py-4">
@@ -219,17 +258,21 @@ function DPDPPage() {
                   <td className="px-6 py-4 text-gray-300">{req.received_on}</td>
                   <td className="px-6 py-4 text-gray-300">{req.sla_due}</td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`font-semibold ${
-                        daysLeft <= 5
-                          ? "text-red-400 animate-pulse"
-                          : daysLeft <= 15
-                          ? "text-yellow-400"
-                          : "text-green-400"
-                      }`}
-                    >
-                      {daysLeft} days
-                    </span>
+                    {req.status === "Completed" ? (
+                      <span className="text-gray-500 font-medium">—</span>
+                    ) : (
+                      <span
+                        className={`font-semibold ${
+                          daysLeft <= 5
+                            ? "text-red-400 animate-pulse"
+                            : daysLeft <= 15
+                            ? "text-yellow-400"
+                            : "text-green-400"
+                        }`}
+                      >
+                        {daysLeft} days
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-gray-300 text-sm">
                     {role === "admin" ? (
