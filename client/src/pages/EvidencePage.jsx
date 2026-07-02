@@ -78,8 +78,17 @@ function EvidencePage() {
   };
 
   const handleReview = async (evidenceId, status) => {
+    let reason = null;
+    if (status === "Rejected" || status === "Needs Resubmission") {
+      reason = prompt("Please enter the reason for rejection:");
+      if (reason === null) return; // User cancelled
+      if (!reason.trim()) {
+        alert("A rejection reason is required.");
+        return;
+      }
+    }
     try {
-      await reviewEvidence(evidenceId, status);
+      await reviewEvidence(evidenceId, status, reason);
       fetchData();
     } catch (err) {
       alert("Review action failed: " + err.message);
@@ -184,7 +193,7 @@ function EvidencePage() {
                   <td className="px-6 py-4 text-gray-300 max-w-xs truncate">
                     {item.file_url_or_text?.startsWith("uploads/") ? (
                       <a
-                        href={`http://localhost:8000/${item.file_url_or_text}`}
+                        href={`/api/${item.file_url_or_text}`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-blue-400 hover:underline"
@@ -206,7 +215,14 @@ function EvidencePage() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <Badge status={item.status} />
+                    <div className="flex flex-col gap-1">
+                      <Badge status={item.status} />
+                      {item.rejection_reason && (
+                        <span className="text-[10px] text-red-400 max-w-[150px] truncate block" title={item.rejection_reason}>
+                          {item.rejection_reason}
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   <td className="px-6 py-4">

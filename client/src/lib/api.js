@@ -153,14 +153,14 @@ export async function uploadEvidence(controlId, file, linkOrText) {
   return res.json();
 }
 
-export async function reviewEvidence(id, status) {
+export async function reviewEvidence(id, status, rejectionReason) {
   const res = await fetch(`${BASE_URL}/evidence/${id}/review`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       ...getAuthHeaders(),
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, rejection_reason: rejectionReason }),
   });
   return res.json();
 }

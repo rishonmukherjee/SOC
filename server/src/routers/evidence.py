@@ -21,6 +21,7 @@ from pydantic import BaseModel
 
 class EvidenceReviewRequest(BaseModel):
     status: str # 'Approved', 'Rejected', 'Needs Resubmission'
+    rejection_reason: Optional[str] = None
 
 class EvidenceResponse(BaseModel):
     id: str
@@ -29,6 +30,7 @@ class EvidenceResponse(BaseModel):
     status: str
     uploaded_by: Optional[str]
     reviewed_by: Optional[str]
+    rejection_reason: Optional[str] = None
     created_at: str
 
 # --- Routes ---
@@ -117,8 +119,8 @@ def review_evidence(
 
     try:
         cursor = db.execute(
-            "UPDATE evidence SET status = ?, reviewed_by = ? WHERE id = ?",
-            (req.status, user.id, evidence_id)
+            "UPDATE evidence SET status = ?, reviewed_by = ?, rejection_reason = ? WHERE id = ?",
+            (req.status, user.id, req.rejection_reason, evidence_id)
         )
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Evidence not found")
