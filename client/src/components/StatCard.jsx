@@ -70,14 +70,6 @@ function StatCard({
           </h2>
         </div>
 
-        {Icon && (
-          <div
-            className={`p-3 rounded-lg border ${c.bg} ${c.border}`}
-          >
-            <Icon size={20} className={c.text} />
-          </div>
-        )}
-
       </div>
 
       <div className="mt-5 flex flex-col items-start gap-3">

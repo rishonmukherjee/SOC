@@ -241,9 +241,11 @@ function DashboardPage() {
           <div className="rounded-lg bg-black/30 border border-gray-800 p-4">
             <p className="text-gray-500 text-xs uppercase">Risks Severity</p>
             <h4 className="text-white text-2xl font-semibold mt-2">
-              {summary?.openRisksBySeverity?.Critical || 0}
+              {openRisksCount}
             </h4>
-            <p className="text-red-400 text-sm mt-1">Critical Open Risks</p>
+            <p className="text-red-400 text-sm mt-1">
+              {summary?.openRisksBySeverity?.Critical || 0} Critical / {summary?.openRisksBySeverity?.High || 0} High
+            </p>
           </div>
           <div className="rounded-lg bg-black/30 border border-gray-800 p-4">
             <p className="text-gray-500 text-xs uppercase">Evidence Review</p>
@@ -261,23 +263,31 @@ function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between rounded-lg border border-green-500/20 bg-green-500/10 px-5 py-4">
+        <div className={`mt-6 flex items-center justify-between rounded-lg border px-5 py-4 ${
+          (summary?.controlsImplementedPct || 0) >= 80
+            ? "border-green-500/20 bg-green-500/10"
+            : "border-yellow-500/20 bg-yellow-500/10"
+        }`}>
           <div>
-            <h4 className="text-green-400 font-semibold">Audit Readiness</h4>
+            <h4 className={`font-semibold ${
+              (summary?.controlsImplementedPct || 0) >= 80 ? "text-green-400" : "text-yellow-400"
+            }`}>
+              Audit Readiness
+            </h4>
             <p className="text-gray-400 text-sm mt-1">
-              {summary?.controlsImplementedPct >= 80
+              {(summary?.controlsImplementedPct || 0) >= 80
                 ? "Your organization is currently ready for an audit."
                 : "Remediation recommended: Implement more controls to reach audit readiness target (80%)."}
             </p>
           </div>
           <span
             className={`px-4 py-2 rounded-full text-sm font-medium ${
-              summary?.controlsImplementedPct >= 80
+              (summary?.controlsImplementedPct || 0) >= 80
                 ? "bg-green-500/20 text-green-400"
                 : "bg-yellow-500/20 text-yellow-400"
             }`}
           >
-            {summary?.controlsImplementedPct >= 80 ? "Ready" : "In Progress"}
+            {(summary?.controlsImplementedPct || 0) >= 80 ? "Ready" : "In Progress"}
           </span>
         </div>
       </div>
