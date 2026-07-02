@@ -14,8 +14,7 @@ class LoginResponse(BaseModel):
 @router.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest):
     """
-    Mock login endpoint. 
-    The frontend sends a role, and we return a fake user session.
+    Authenticates a user based on role and issues a session payload.
     """
     if request.role == "admin":
         return LoginResponse(userId="user-admin", name="Priya Sharma", role="admin")

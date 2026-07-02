@@ -66,8 +66,6 @@ def create_risk(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # Only admins can create risks for now, though not strictly required by the prompt, it's good practice. 
-    # The hackathon spec didn't strictly say ONLY admin, but let's just let anyone for now or follow the UI gating.
     risk_id = f"R-{uuid.uuid4().hex[:6].upper()}"
     
     try:
@@ -81,7 +79,7 @@ def create_risk(
         log_activity(db, "Risk", risk_id, f"Created Risk: {risk.title}", user.id, user.name)
         db.commit()
         
-        # Fetch the created risk to return it (gets the auto-calculated score and defaults)
+        # Fetch the created risk to return the auto-calculated score and defaults
         cursor = db.execute("SELECT * FROM risks WHERE id = ?", (risk_id,))
         new_risk = cursor.fetchone()
         return dict(new_risk)

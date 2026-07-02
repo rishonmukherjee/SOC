@@ -54,7 +54,7 @@ def list_evidence(
     rows = cursor.fetchall()
     return [dict(row) for row in rows]
 
-# We don't mount this directly under /evidence, we mount it under /controls/{control_id}/evidence
+
 @router.post("/controls/{control_id}/evidence", response_model=EvidenceResponse)
 def upload_evidence(
     control_id: str,

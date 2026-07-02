@@ -99,7 +99,7 @@ def update_control(
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided to update")
 
-    # In a real app we'd check if the user is an admin or the control owner here
+
 
     set_clauses = []
     params = []

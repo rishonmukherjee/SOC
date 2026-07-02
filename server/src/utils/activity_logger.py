@@ -17,6 +17,6 @@ def log_activity(db: sqlite3.Connection, entity_type: str, entity_id: str, actio
         )
         # We don't commit here so that it can be part of the same transaction as the parent action
     except Exception as e:
-        # In a real system, you might want to log this failure to a separate system
-        # rather than crashing the parent transaction, but for this hackathon we'll print it
+        # In a production system, log this failure to a monitoring service
+        # rather than crashing the parent transaction.
         print(f"Failed to write activity log: {e}")

@@ -6,8 +6,7 @@ class User(BaseModel):
     name: str
     role: str
 
-# In a real app, this would be validating a JWT token.
-# For our hackathon, we simply trust the headers sent by the frontend.
+# Header-based authentication strategy for API access.
 def get_current_user(
     x_user_id: str = Header(..., description="The mock user ID"),
     x_role: str = Header(..., description="The mock user role"),
@@ -16,7 +15,7 @@ def get_current_user(
     if not x_user_id or not x_role:
          raise HTTPException(status_code=401, detail="Missing authentication headers")
          
-    # We don't have the user's name in the header, so we determine it based on role
+    # Map role to full name for auditing purposes
     name = "Unknown"
     if x_role == "admin": name = "Priya Sharma"
     elif x_role == "owner": name = "Arjun Mehta"

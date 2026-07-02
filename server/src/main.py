@@ -8,7 +8,7 @@ app = FastAPI(title="ComplianceOS API")
 # Configure CORS so the React frontend can talk to us
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For the hackathon, accept all origins
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

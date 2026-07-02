@@ -1,4 +1,4 @@
--- Users (3 hardcoded mock users)
+-- Users
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS risks (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Controls (pre-seeded, no POST needed)
+-- Controls
 CREATE TABLE IF NOT EXISTS controls (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
