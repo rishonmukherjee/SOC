@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Plus, Filter } from "lucide-react";
 import Table from "../components/Table";
 import Badge from "../components/Badge";
 import Modal from "../components/Modal";
 import CreateRiskForm from "../components/Createrisk";
-import { risks } from "../lib/mckdata";
+import { getRisks, createRisk } from "../lib/api";
 
 function RisksPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
+  const [risks, setRisks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const columns = [
     "Risk",
@@ -17,8 +20,33 @@ function RisksPage() {
     "Impact",
     "Score",
     "Status",
-    "Actions",
   ];
+
+  async function fetchRisks() {
+    try {
+      setLoading(true);
+      const data = await getRisks();
+      setRisks(data);
+    } catch (err) {
+      setError("Failed to load risks");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchRisks();
+  }, []);
+
+  const handleCreateRisk = async (newRiskData) => {
+    try {
+      await createRisk(newRiskData);
+      setModalOpen(false);
+      fetchRisks(); // Refresh the list
+    } catch (err) {
+      alert("Failed to create risk: " + err.message);
+    }
+  };
 
   const filteredRisks = risks.filter((risk) => {
     const matchesSearch = risk.title
@@ -81,35 +109,44 @@ function RisksPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <Table columns={columns}>
-        {filteredRisks.map((risk) => (
-          <tr
-            key={risk.id}
-            className="border-t border-gray-800 hover:bg-gray-800/30 transition-colors"
-          >
-            <td className="px-6 py-4 text-white">{risk.title}</td>
-
-            <td className="px-6 py-4 text-gray-300">{risk.likelihood}</td>
-
-            <td className="px-6 py-4 text-gray-300">{risk.impact}</td>
-
-            <td className="px-6 py-4">
-              <span className="font-semibold text-white">{risk.score}</span>
-            </td>
-
-            <td className="px-6 py-4">
-              <Badge status={risk.status} />
-            </td>
-
-            <td className="px-6 py-4">
-              <button className="text-blue-400 hover:text-blue-300 text-sm">
-                Edit
-              </button>
-            </td>
-          </tr>
-        ))}
-      </Table>
+      {/* Loading state */}
+      {loading ? (
+        <div className="flex h-[40vh] items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-400 text-center">
+          {error}
+        </div>
+      ) : (
+        /* Table */
+        <Table columns={columns}>
+          {filteredRisks.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500 text-sm">
+                No risks found matching criteria.
+              </td>
+            </tr>
+          ) : (
+            filteredRisks.map((risk) => (
+              <tr
+                key={risk.id}
+                className="border-t border-gray-800 hover:bg-gray-800/30 transition-colors"
+              >
+                <td className="px-6 py-4 text-white font-medium">{risk.title}</td>
+                <td className="px-6 py-4 text-gray-300">{risk.likelihood}</td>
+                <td className="px-6 py-4 text-gray-300">{risk.impact}</td>
+                <td className="px-6 py-4">
+                  <span className="font-semibold text-white">{risk.score}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <Badge status={risk.status} />
+                </td>
+              </tr>
+            ))
+          )}
+        </Table>
+      )}
 
       {/* Create Risk Modal */}
       <Modal
@@ -118,10 +155,7 @@ function RisksPage() {
         title="Create Risk"
       >
         <CreateRiskForm
-          onSubmit={(risk) => {
-            console.log("New risk:", risk);
-            setModalOpen(false);
-          }}
+          onSubmit={handleCreateRisk}
         />
       </Modal>
     </div>

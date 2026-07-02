@@ -1,20 +1,64 @@
-import { useState } from "react";
-import { Search, Plus, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Filter } from "lucide-react";
 import Table from "../components/Table";
 import Badge from "../components/Badge";
-import { controls } from "../lib/mckdata";
+import { getControls, updateControl } from "../lib/api";
+import { useRole } from "../hooks/useRole";
+
+const ownerNames = {
+  "user-admin": "Priya Sharma",
+  "user-owner": "Arjun Mehta",
+  "user-auditor": "Meera Iyer",
+};
 
 function ControlsPage() {
+  const { role } = useRole();
   const [searchTerm, setSearchTerm] = useState("");
   const [criteriaFilter, setCriteriaFilter] = useState("All Criteria");
+  const [controls, setControls] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const columns = [
     "Control",
     "Trust Criteria",
     "Status",
     "Owner",
-    "Actions",
   ];
+
+  async function fetchControls() {
+    try {
+      setLoading(true);
+      const data = await getControls();
+      setControls(data);
+    } catch (err) {
+      setError("Failed to load controls");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchControls();
+  }, []);
+
+  const handleStatusChange = async (controlId, newStatus) => {
+    try {
+      await updateControl(controlId, { status: newStatus });
+      fetchControls(); // Refresh
+    } catch (err) {
+      alert("Failed to update control status: " + err.message);
+    }
+  };
+
+  const handleOwnerChange = async (controlId, newOwnerId) => {
+    try {
+      await updateControl(controlId, { owner_id: newOwnerId });
+      fetchControls(); // Refresh
+    } catch (err) {
+      alert("Failed to assign control: " + err.message);
+    }
+  };
 
   const filteredControls = controls.filter((control) => {
     const matchesSearch = control.name
@@ -22,7 +66,8 @@ function ControlsPage() {
       .includes(searchTerm.toLowerCase());
 
     const matchesCriteria =
-      criteriaFilter === "All Criteria" || control.criteria === criteriaFilter;
+      criteriaFilter === "All Criteria" ||
+      control.trust_criteria === criteriaFilter;
 
     return matchesSearch && matchesCriteria;
   });
@@ -37,10 +82,6 @@ function ControlsPage() {
             Manage SOC 2 controls and their implementation status.
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg shadow-blue-900/20 active:scale-95">
-          <Plus size={16} />
-          Assign Control
-        </button>
       </div>
 
       {/* Filters */}
@@ -60,7 +101,7 @@ function ControlsPage() {
         </div>
 
         <div className="relative">
-          <select 
+          <select
             value={criteriaFilter}
             onChange={(e) => setCriteriaFilter(e.target.value)}
             className="bg-black/50 border border-gray-800 text-gray-300 pl-4 pr-10 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 cursor-pointer text-sm transition-all appearance-none hover:border-gray-700 min-w-[170px]"
@@ -69,6 +110,8 @@ function ControlsPage() {
             <option>Security</option>
             <option>Availability</option>
             <option>Confidentiality</option>
+            <option>Processing Integrity</option>
+            <option>Privacy</option>
           </select>
 
           <Filter
@@ -78,31 +121,75 @@ function ControlsPage() {
         </div>
       </div>
 
-      <Table columns={columns}>
-        {filteredControls.map((control) => (
-          <tr key={control.id} className="border-t border-gray-800 hover:bg-gray-800/30 transition-colors">
-            <td className="px-6 py-4 text-white">{control.name}</td>
+      {/* Loading & Error States */}
+      {loading ? (
+        <div className="flex h-[40vh] items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-400 text-center">
+          {error}
+        </div>
+      ) : (
+        <Table columns={columns}>
+          {filteredControls.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500 text-sm">
+                No controls found matching criteria.
+              </td>
+            </tr>
+          ) : (
+            filteredControls.map((control) => (
+              <tr key={control.id} className="border-t border-gray-800 hover:bg-gray-800/30 transition-colors">
+                <td className="px-6 py-4 text-white">
+                  <div className="font-medium">{control.name}</div>
+                  {control.description && (
+                    <div className="text-xs text-gray-500 mt-0.5">{control.description}</div>
+                  )}
+                </td>
 
-            <td className="px-6 py-4 text-gray-300">
-              {control.criteria}
-            </td>
+                <td className="px-6 py-4 text-gray-300">
+                  {control.trust_criteria}
+                </td>
 
-            <td className="px-6 py-4">
-              <Badge status={control.status} />
-            </td>
+                <td className="px-6 py-4">
+                  {/* Allow Owners and Admins to toggle status directly */}
+                  {role === "admin" || role === "owner" ? (
+                    <select
+                      value={control.status}
+                      onChange={(e) => handleStatusChange(control.id, e.target.value)}
+                      className="bg-black border border-gray-800 text-gray-300 rounded px-2 py-1 text-xs cursor-pointer focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="Not Started">Not Started</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Implemented">Implemented</option>
+                    </select>
+                  ) : (
+                    <Badge status={control.status} />
+                  )}
+                </td>
 
-            <td className="px-6 py-4 text-gray-300">
-              {control.owner}
-            </td>
-
-            <td className="px-6 py-4">
-              <button className="text-blue-400 hover:text-blue-300 text-sm">
-                View
-              </button>
-            </td>
-          </tr>
-        ))}
-      </Table>
+                <td className="px-6 py-4 text-gray-300 text-sm">
+                  {/* Allow Admin to re-assign owners */}
+                  {role === "admin" ? (
+                    <select
+                      value={control.owner_id}
+                      onChange={(e) => handleOwnerChange(control.id, e.target.value)}
+                      className="bg-black border border-gray-800 text-gray-300 rounded px-2 py-1 text-xs cursor-pointer focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="user-admin">Priya Sharma (Admin)</option>
+                      <option value="user-owner">Arjun Mehta (Owner)</option>
+                      <option value="user-auditor">Meera Iyer (Auditor)</option>
+                    </select>
+                  ) : (
+                    ownerNames[control.owner_id] || control.owner_id
+                  )}
+                </td>
+              </tr>
+            ))
+          )}
+        </Table>
+      )}
     </div>
   );
 }

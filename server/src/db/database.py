@@ -5,7 +5,7 @@ DB_FILE = "database.sqlite"
 
 def init_db():
     """Initializes the database by running the schema.sql file."""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     cursor = conn.cursor()
     
     with open("src/db/schema.sql", "r") as f:
@@ -17,7 +17,7 @@ def init_db():
 
 def get_db() -> Generator[sqlite3.Connection, None, None]:
     """Dependency that yields a database connection."""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     # This allows accessing columns by name (e.g., row["id"])
     conn.row_factory = sqlite3.Row 
     try:

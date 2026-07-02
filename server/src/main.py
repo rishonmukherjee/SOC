@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from src.routers import auth, risks, controls, evidence, dpdp, activity_log, dashboard
+from src.db.database import init_db
+
+# Initialize database
+init_db()
 
 app = FastAPI(title="ComplianceOS API")
 
