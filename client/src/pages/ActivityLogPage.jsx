@@ -60,7 +60,7 @@ function ActivityLogPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white tracking-tight">Activity Log</h2>
+          <h2 className="text-2xl font-semibold text-white tracking-tight">Activity Logs</h2>
           <p className="text-sm text-gray-400 mt-1">
             Track all compliance-related actions across the platform.
           </p>

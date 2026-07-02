@@ -16,7 +16,7 @@ const navItems = [
   { name: "Controls", path: "/controls", icon: ShieldCheck },
   { name: "Evidence", path: "/evidence", icon: FileCheck2 },
   { name: "DPDP", path: "/dpdp", icon: ScrollText },
-  { name: "Activity", path: "/activity", icon: Activity },
+  { name: "Activity Logs", path: "/activity", icon: Activity },
 ];
 
 function Sidebar() {

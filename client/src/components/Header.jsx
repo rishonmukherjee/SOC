@@ -9,7 +9,7 @@ function Header() {
     "/controls": "Controls",
     "/evidence": "Evidence",
     "/dpdp": "DPDP",
-    "/activity": "Activity Log",
+    "/activity": "Activity Logs",
   };
 
   const pageTitle = titles[location.pathname] || "Dashboard";

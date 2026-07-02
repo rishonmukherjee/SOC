@@ -43,7 +43,8 @@ def seed():
             [
                 ('user-admin', 'Priya Sharma', 'admin'),
                 ('user-owner', 'Arjun Mehta', 'owner'),
-                ('user-auditor', 'Meera Iyer', 'auditor')
+                ('user-auditor', 'Meera Iyer', 'auditor'),
+                ('user-dpo', 'Rohan Das', 'owner')
             ]
         )
 
@@ -132,10 +133,10 @@ def seed():
         # Seed DPDP Requests
         dpdp_requests = [
             ('D01', 'Access', 'Amit Patel', 'Open', str(today - timedelta(days=27)), str(today + timedelta(days=3)), 'user-admin'),
-            ('D02', 'Erasure', 'Sneha Reddy', 'In Progress', str(today - timedelta(days=15)), str(today + timedelta(days=15)), 'user-admin'),
+            ('D02', 'Erasure', 'Sneha Reddy', 'In Progress', str(today - timedelta(days=15)), str(today + timedelta(days=15)), 'user-dpo'),
             ('D03', 'Correction', 'Vikram Singh', 'Open', str(today - timedelta(days=2)), str(today + timedelta(days=28)), 'user-owner'),
             ('D04', 'Access', 'Deepa Nair', 'Completed', str(today - timedelta(days=40)), str(today - timedelta(days=10)), 'user-admin'),
-            ('D05', 'Erasure', 'Karan Johar', 'Rejected', str(today - timedelta(days=10)), str(today + timedelta(days=20)), 'user-admin')
+            ('D05', 'Erasure', 'Karan Johar', 'Rejected', str(today - timedelta(days=10)), str(today + timedelta(days=20)), 'user-dpo')
         ]
         cursor.executemany(
             "INSERT INTO dpdp_requests (id, request_type, data_principal_name, status, received_on, sla_due, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?)",
