@@ -4,3 +4,8 @@ dist-ssr
 .env
 .DS_Store
 *.log
+WORK_DIVISION.md
+__pycache__/
+*.pyc
+*.sqlite
+database.sqlite

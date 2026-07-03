@@ -10,7 +10,7 @@ from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
-# --- Pydantic Models ---
+
 
 class RiskCreate(BaseModel):
     title: str
@@ -41,7 +41,7 @@ class RiskResponse(BaseModel):
 class RiskDetailResponse(RiskResponse):
     linked_controls: List[dict]
 
-# --- Routes ---
+
 
 @router.get("", response_model=List[RiskResponse])
 def list_risks(
@@ -79,7 +79,7 @@ def create_risk(
         log_activity(db, "Risk", risk_id, f"Created Risk: {risk.title}", user.id, user.name)
         db.commit()
         
-        # Fetch the created risk to return the auto-calculated score and defaults
+        # Re-fetch to return auto-calculated fields from SQLite
         cursor = db.execute("SELECT * FROM risks WHERE id = ?", (risk_id,))
         new_risk = cursor.fetchone()
         return dict(new_risk)

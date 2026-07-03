@@ -9,11 +9,16 @@ from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
-# --- Pydantic Models ---
+
 
 class ControlUpdate(BaseModel):
     status: Optional[str] = None
     owner_id: Optional[str] = None
+
+class ControlDependencyInfo(BaseModel):
+    related_control_id: str
+    related_control_name: str
+    relationship: str
 
 class ControlResponse(BaseModel):
     id: str
@@ -22,12 +27,17 @@ class ControlResponse(BaseModel):
     description: Optional[str]
     status: str
     owner_id: str
+    dependencies: Optional[List[ControlDependencyInfo]] = []
 
 class ControlDetailResponse(ControlResponse):
     linked_risks: List[dict]
     evidence: List[dict]
 
-# --- Routes ---
+class LinkControlDependencyRequest(BaseModel):
+    related_control_id: str
+    relationship: str # 'supplements', 'depends_on', 'replaces'
+
+
 
 @router.get("", response_model=List[ControlResponse])
 def list_controls(
@@ -52,7 +62,33 @@ def list_controls(
         
     cursor = db.execute(query, params)
     rows = cursor.fetchall()
-    return [dict(row) for row in rows]
+    
+    # Aggregate dependencies for all controls to minimize queries
+    dep_cursor = db.execute(
+        """
+        SELECT cd.source_control_id, cd.related_control_id, c.name as related_control_name, cd.relationship
+        FROM control_dependencies cd
+        JOIN controls c ON cd.related_control_id = c.id
+        """
+    )
+    all_deps = dep_cursor.fetchall()
+    deps_by_source = {}
+    for dep in all_deps:
+        src = dep["source_control_id"]
+        if src not in deps_by_source:
+            deps_by_source[src] = []
+        deps_by_source[src].append({
+            "related_control_id": dep["related_control_id"],
+            "related_control_name": dep["related_control_name"],
+            "relationship": dep["relationship"]
+        })
+        
+    results = []
+    for row in rows:
+        d = dict(row)
+        d["dependencies"] = deps_by_source.get(row["id"], [])
+        results.append(d)
+    return results
 
 @router.get("/{control_id}", response_model=ControlDetailResponse)
 def get_control(
@@ -60,7 +96,7 @@ def get_control(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # Fetch control
+    # Fetch base control metadata
     cursor = db.execute("SELECT * FROM controls WHERE id = ?", (control_id,))
     control_row = cursor.fetchone()
     
@@ -83,9 +119,22 @@ def get_control(
     cursor = db.execute("SELECT * FROM evidence WHERE control_id = ?", (control_id,))
     evidence = cursor.fetchall()
     
+    # Fetch dependencies
+    dep_cursor = db.execute(
+        """
+        SELECT cd.related_control_id, c.name as related_control_name, cd.relationship
+        FROM control_dependencies cd
+        JOIN controls c ON cd.related_control_id = c.id
+        WHERE cd.source_control_id = ?
+        """,
+        (control_id,)
+    )
+    dependencies = dep_cursor.fetchall()
+    
     response = dict(control_row)
     response["linked_risks"] = [dict(r) for r in risks]
     response["evidence"] = [dict(e) for e in evidence]
+    response["dependencies"] = [dict(d) for d in dependencies]
     return response
 
 @router.patch("/{control_id}", response_model=ControlResponse)
@@ -98,8 +147,6 @@ def update_control(
     update_data = updates.dict(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided to update")
-
-
 
     set_clauses = []
     params = []
@@ -119,9 +166,50 @@ def update_control(
         log_activity(db, "Control", control_id, "Updated Control", user.id, user.name)
         db.commit()
         
-        cursor = db.execute("SELECT * FROM controls WHERE id = ?", (control_id,))
-        updated_control = cursor.fetchone()
-        return dict(updated_control)
+        # Get updated control with its dependencies
+        return get_control(control_id, db, user)
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{control_id}/link-dependency")
+def link_control_dependency(
+    control_id: str,
+    req: LinkControlDependencyRequest,
+    db: sqlite3.Connection = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    if user.role not in ["admin", "owner"]:
+        raise HTTPException(status_code=403, detail="Only admins and owners can link controls")
+    try:
+        db.execute(
+            """
+            INSERT INTO control_dependencies (source_control_id, related_control_id, relationship)
+            VALUES (?, ?, ?)
+            """,
+            (control_id, req.related_control_id, req.relationship)
+        )
+        db.commit()
+        log_activity(db, "Control Dependency", control_id, f"Linked dependency to {req.related_control_id} ({req.relationship})", user.id, user.name)
+        return {"message": "Dependency link created"}
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=400, detail="Dependency link already exists or invalid control IDs")
+
+@router.delete("/{control_id}/link-dependency/{related_control_id}")
+def unlink_control_dependency(
+    control_id: str,
+    related_control_id: str,
+    db: sqlite3.Connection = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    if user.role not in ["admin", "owner"]:
+        raise HTTPException(status_code=403, detail="Only admins and owners can unlink controls")
+    cursor = db.execute(
+        "DELETE FROM control_dependencies WHERE source_control_id = ? AND related_control_id = ?",
+        (control_id, related_control_id)
+    )
+    db.commit()
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Dependency link not found")
+    log_activity(db, "Control Dependency", control_id, f"Removed dependency link to {related_control_id}", user.id, user.name)
+    return {"message": "Dependency link removed"}

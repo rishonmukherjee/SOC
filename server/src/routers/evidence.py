@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
 
 from src.db.database import get_db
 from src.dependencies import get_current_user, User
@@ -12,15 +13,11 @@ from src.utils.activity_logger import log_activity
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
-
-# Ensure upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# --- Pydantic Models ---
-from pydantic import BaseModel
-
 class EvidenceReviewRequest(BaseModel):
-    status: str # 'Approved', 'Rejected', 'Needs Resubmission'
+    status: str
+    rejection_reason: Optional[str] = None
 
 class EvidenceResponse(BaseModel):
     id: str
@@ -29,9 +26,8 @@ class EvidenceResponse(BaseModel):
     status: str
     uploaded_by: Optional[str]
     reviewed_by: Optional[str]
+    rejection_reason: Optional[str] = None
     created_at: str
-
-# --- Routes ---
 
 @router.get("", response_model=List[EvidenceResponse])
 def list_evidence(
@@ -40,6 +36,7 @@ def list_evidence(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
+    """Retrieves all evidence artifacts, optionally filtered by status or parent control ID."""
     query = "SELECT * FROM evidence WHERE 1=1"
     params = []
     
@@ -63,7 +60,7 @@ def upload_evidence(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # Verify control exists
+    """Allows owners to upload a physical file or link as evidence for a given control."""
     cursor = db.execute("SELECT id FROM controls WHERE id = ?", (control_id,))
     if not cursor.fetchone():
         raise HTTPException(status_code=404, detail="Control not found")
@@ -107,7 +104,7 @@ def review_evidence(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # Role check: Only admin or auditor can review evidence
+    """Allows administrators or auditors to approve, reject, or request resubmission on an evidence artifact."""
     if user.role not in ["admin", "auditor"]:
         raise HTTPException(status_code=403, detail="Only admins or auditors can review evidence")
 
@@ -117,8 +114,8 @@ def review_evidence(
 
     try:
         cursor = db.execute(
-            "UPDATE evidence SET status = ?, reviewed_by = ? WHERE id = ?",
-            (req.status, user.id, evidence_id)
+            "UPDATE evidence SET status = ?, reviewed_by = ?, rejection_reason = ? WHERE id = ?",
+            (req.status, user.id, req.rejection_reason, evidence_id)
         )
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Evidence not found")

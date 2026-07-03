@@ -11,7 +11,7 @@ from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
-# --- Pydantic Models ---
+
 
 class DPDPRequestCreate(BaseModel):
     request_type: str # 'Access', 'Erasure', 'Correction'
@@ -21,6 +21,7 @@ class DPDPRequestCreate(BaseModel):
 class DPDPRequestUpdate(BaseModel):
     status: Optional[str] = None # 'Open', 'In Progress', 'Completed', 'Rejected'
     assigned_to: Optional[str] = None
+    rejection_reason: Optional[str] = None
 
 class DPDPRequestResponse(BaseModel):
     id: str
@@ -30,6 +31,7 @@ class DPDPRequestResponse(BaseModel):
     received_on: date
     sla_due: date
     assigned_to: Optional[str]
+    rejection_reason: Optional[str] = None
 
 class ConsentLogCreate(BaseModel):
     data_principal_name: str
@@ -43,14 +45,14 @@ class ConsentLogResponse(BaseModel):
     consent_status: str
     timestamp: str
 
-# --- Routes ---
+
 
 @router.get("/requests", response_model=List[DPDPRequestResponse])
 def list_dpdp_requests(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # Sort by SLA due date ascending (closest deadline first)
+    """Retrieves all active DPDP data principal requests ordered by impending SLA deadlines."""
     cursor = db.execute("SELECT * FROM dpdp_requests ORDER BY sla_due ASC")
     rows = cursor.fetchall()
     return [dict(row) for row in rows]
@@ -70,7 +72,7 @@ def log_dpdp_request(
 
     request_id = f"D-{uuid.uuid4().hex[:6].upper()}"
     
-    # Calculate SLA due date (30 days from received date)
+    # SLA defaults to 30 days per DPDP guidelines
     sla_due = req.received_on + timedelta(days=30)
 
     try:
@@ -104,6 +106,15 @@ def update_dpdp_request(
     update_data = updates.dict(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=400, detail="No fields provided to update")
+
+    if "assigned_to" in update_data and update_data["assigned_to"] is not None:
+        assignee = db.execute("SELECT role FROM users WHERE id = ?", (update_data["assigned_to"],)).fetchone()
+        if not assignee:
+            raise HTTPException(status_code=400, detail="Invalid assigned user")
+        
+        req_type = db.execute("SELECT request_type FROM dpdp_requests WHERE id = ?", (request_id,)).fetchone()
+        if req_type and req_type["request_type"] == "Erasure" and assignee["role"] == "auditor":
+            raise HTTPException(status_code=400, detail="Auditors cannot be assigned to data deletion (Erasure) requests")
 
     set_clauses = []
     params = []

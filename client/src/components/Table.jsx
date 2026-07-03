@@ -4,9 +4,9 @@ function Table({ columns, children }) {
       <table className="w-full">
         <thead className="border-b border-gray-800 bg-black/30">
           <tr>
-            {columns.map((column) => (
+            {columns.map((column, idx) => (
               <th
-                key={column}
+                key={idx}
                 className="px-6 py-4 text-left text-sm font-semibold text-gray-300"
               >
                 {column}

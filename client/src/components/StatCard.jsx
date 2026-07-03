@@ -53,7 +53,7 @@ function StatCard({
   return (
     <div className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-gray-700 hover:bg-gray-900/60">
       
-      {/* Accent Line */}
+
       <span
         className={`absolute inset-x-0 top-0 h-[2px] ${c.accent} opacity-70`}
       />
@@ -70,26 +70,20 @@ function StatCard({
           </h2>
         </div>
 
-        {Icon && (
-          <div
-            className={`p-3 rounded-lg border ${c.bg} ${c.border}`}
-          >
-            <Icon size={20} className={c.text} />
-          </div>
-        )}
-
       </div>
 
-      <div className="mt-5 flex items-center justify-between">
+      <div className="mt-5 flex flex-col items-start gap-3">
 
         <span
-          className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ${c.text} ${c.bg} ${c.border}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium leading-tight ${c.text} ${c.bg} ${c.border}`}
         >
-          <TrendIcon change={change} />
-          {change}
+          <span className="shrink-0 flex items-center">
+            <TrendIcon change={change} />
+          </span>
+          <span>{change}</span>
         </span>
 
-        <span className="text-xs text-gray-500">
+        <span className="text-[11px] text-gray-500">
           Updated just now
         </span>
 

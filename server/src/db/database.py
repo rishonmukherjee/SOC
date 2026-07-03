@@ -3,9 +3,9 @@ from typing import Generator
 
 DB_FILE = "database.sqlite"
 
-def init_db():
-    """Initializes the database by running the schema.sql file."""
-    conn = sqlite3.connect(DB_FILE)
+def init_db() -> None:
+    """Initializes the database by executing the schema.sql script."""
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     cursor = conn.cursor()
     
     with open("src/db/schema.sql", "r") as f:
@@ -16,9 +16,11 @@ def init_db():
     conn.close()
 
 def get_db() -> Generator[sqlite3.Connection, None, None]:
-    """Dependency that yields a database connection."""
-    conn = sqlite3.connect(DB_FILE)
-    # This allows accessing columns by name (e.g., row["id"])
+    """
+    FastAPI dependency yielding a thread-safe database connection.
+    Configured with sqlite3.Row for dictionary-like column access.
+    """
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     conn.row_factory = sqlite3.Row 
     try:
         yield conn
