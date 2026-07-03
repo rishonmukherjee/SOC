@@ -15,7 +15,7 @@ A unified compliance management platform for SOC 2 readiness and DPDP Act, 2023 
 
 | Service | URL |
 |---|---|
-| Frontend (Vercel) | [https://soc-o1z5fhj0-rishonmukherjees-projects.vercel.app](https://soc-o1z5fhj0-rishonmukherjees-projects.vercel.app) |
+| Frontend (Vercel) | [https://soc-ivory.vercel.app/login](https://soc-ivory.vercel.app/login) |
 | Backend API (Render) | [https://soc-1t07.onrender.com](https://soc-1t07.onrender.com) |
 
 ---
