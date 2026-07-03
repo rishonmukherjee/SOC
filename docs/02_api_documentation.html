@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Documentation | ComplianceOS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.7;
+      color: #1a1a2e;
+      background: #fff;
+    }
+
+    @page { size: A4; margin: 20mm 18mm; }
+    @media print {
+      .no-print { display: none; }
+      section { page-break-inside: avoid; }
+      h2 { page-break-before: always; }
+      h2:first-of-type { page-break-before: avoid; }
+    }
+
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #064e3b;
+      color: #fff;
+      padding: 60px;
+      page-break-after: always;
+    }
+
+    .cover .tag {
+      font-size: 9pt;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #6ee7b7;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .cover h1 {
+      font-size: 32pt;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .cover .subtitle {
+      font-size: 14pt;
+      color: #a7f3d0;
+      margin-bottom: 48px;
+    }
+
+    .cover .meta-block {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .cover .meta-item label {
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #6ee7b7;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cover .meta-item span { font-size: 10pt; color: #e2e8f0; }
+
+    .content { padding: 48px 60px; }
+
+    h2 {
+      font-size: 15pt;
+      font-weight: 700;
+      color: #064e3b;
+      margin: 40px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #059669;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .num {
+      background: #059669;
+      color: #fff;
+      font-size: 9pt;
+      font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: #065f46;
+      margin: 20px 0 8px;
+    }
+
+    p { margin-bottom: 10px; color: #374151; }
+    ul, ol { margin: 8px 0 12px 20px; color: #374151; }
+    li { margin-bottom: 5px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px;
+      font-size: 9.5pt;
+    }
+
+    th {
+      background: #064e3b;
+      color: #fff;
+      font-weight: 600;
+      padding: 9px 13px;
+      text-align: left;
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 8px 13px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: #f0fdf4; }
+
+    .endpoint-block {
+      border: 1px solid #d1fae5;
+      border-radius: 10px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f0fdf4;
+      border-bottom: 1px solid #d1fae5;
+    }
+
+    .method {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    .method.get { background: #dbeafe; color: #1d4ed8; }
+    .method.post { background: #d1fae5; color: #065f46; }
+    .method.patch { background: #fef3c7; color: #92400e; }
+    .method.delete { background: #fee2e2; color: #991b1b; }
+
+    .path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5pt;
+      color: #1a1a2e;
+      font-weight: 500;
+    }
+
+    .endpoint-body { padding: 14px 16px; }
+    .endpoint-body p { font-size: 9.5pt; color: #4b5563; margin-bottom: 10px; }
+
+    pre {
+      background: #1e2022;
+      color: #86efac;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin: 8px 0;
+      white-space: pre;
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 8pt;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-right: 4px;
+    }
+
+    .badge.admin { background: #fce7f3; color: #9d174d; }
+    .badge.owner { background: #ede9fe; color: #5b21b6; }
+    .badge.auditor { background: #dbeafe; color: #1d4ed8; }
+    .badge.all { background: #f3f4f6; color: #374151; }
+
+    .toc {
+      background: #f0fdf4;
+      border: 1px solid #d1fae5;
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin: 24px 0 40px;
+    }
+
+    .toc h3 { margin: 0 0 14px; color: #065f46; font-size: 10pt; text-transform: uppercase; letter-spacing: 1px; }
+    .toc ol { margin: 0 0 0 16px; }
+    .toc li { color: #047857; font-size: 10pt; }
+
+    .base-url {
+      background: #f0fdf4;
+      border: 1px solid #059669;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10pt;
+      color: #064e3b;
+      font-weight: 500;
+    }
+
+    .no-print {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #059669;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 10pt;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(5,150,105,0.4);
+    }
+
+    .label { font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin: 12px 0 4px; }
+  </style>
+</head>
+<body>
+
+<div class="cover">
+  <p class="tag">Hackathon Submission Document 2 of 3</p>
+  <h1>API Documentation</h1>
+  <p class="subtitle">ComplianceOS: SOC 2 and DPDP Compliance Management Platform</p>
+  <div class="meta-block">
+    <div class="meta-item"><label>Team Name</label><span>Rajma Rockets</span></div>
+    <div class="meta-item"><label>Document Type</label><span>API Reference</span></div>
+    <div class="meta-item"><label>Member 1</label><span>Ayushmaan Sinha ayushmaansinha@gmail.com</span></div>
+    <div class="meta-item"><label>Member 2</label><span>Rishon Mukherjee rishonmukherjee@gmail.com</span></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li>Overview and Conventions</li>
+      <li>Authentication</li>
+      <li>Dashboard</li>
+      <li>Risks</li>
+      <li>Controls</li>
+      <li>Evidence</li>
+      <li>DPDP</li>
+      <li>Activity Log</li>
+    </ol>
+  </div>
+
+  <h2><span class="num">1</span> Overview and Conventions</h2>
+
+  <p>The ComplianceOS backend exposes a RESTful JSON API. All endpoints are versioned under the <code>/api/v1</code> prefix.</p>
+
+  <div class="base-url">Base URL: https://&lt;render-service&gt;.onrender.com/api/v1</div>
+
+  <h3>Required Request Headers</h3>
+  <p>All endpoints (except <code>POST /auth/login</code>) require the following headers on every request:</p>
+  <table>
+    <thead><tr><th>Header</th><th>Description</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>X-User-Id</td><td>The authenticated user's unique identifier</td><td>user-admin</td></tr>
+      <tr><td>X-Role</td><td>The authenticated user's role</td><td>admin</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Role Badges</h3>
+  <p>Each endpoint indicates the minimum required role using these badges:</p>
+  <p>
+    <span class="badge all">All Roles</span> Any authenticated user may call this endpoint.<br>
+    <span class="badge admin">Admin</span> Requires the admin role.<br>
+    <span class="badge owner">Owner</span> Requires admin or owner role.<br>
+    <span class="badge auditor">Auditor</span> Requires admin or auditor role.
+  </p>
+
+  <h3>Common Response Codes</h3>
+  <table>
+    <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>200 OK</td><td>Successful GET or PATCH</td></tr>
+      <tr><td>201 Created</td><td>Not used; successful POST returns 200 with the created resource</td></tr>
+      <tr><td>400 Bad Request</td><td>Validation error or invalid field values</td></tr>
+      <tr><td>401 Unauthorized</td><td>Missing authentication headers</td></tr>
+      <tr><td>403 Forbidden</td><td>Authenticated but insufficient role</td></tr>
+      <tr><td>404 Not Found</td><td>Requested resource does not exist</td></tr>
+      <tr><td>500 Internal Server Error</td><td>Database or unexpected server error</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">2</span> Authentication</h2>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="path">/auth/login</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Authenticates a user by role and returns the session payload to be stored client-side. No headers required.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "role": "admin" }</pre>
+      <p>Accepted values for role: <code>admin</code>, <code>owner</code>, <code>auditor</code></p>
+      <p class="label">Response</p>
+      <pre>{ "userId": "user-admin", "name": "Priya Sharma", "role": "admin" }</pre>
+    </div>
+  </div>
+
+  <h2><span class="num">3</span> Dashboard</h2>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/dashboard/summary</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns aggregated metrics for the executive dashboard.</p>
+      <p class="label">Response</p>
+      <pre>{
+  "controlsTotal": 15,
+  "controlsByStatus": { "Not Started": 6, "In Progress": 5, "Implemented": 3, "Verified": 1 },
+  "controlsImplementedPct": 27,
+  "openRisksBySeverity": { "Critical": 2, "High": 0, "Medium": 2, "Low": 1 },
+  "evidencePendingCount": 2,
+  "dpdpRequestsDueSoon": [
+    { "id": "D01", "data_principal_name": "Amit Patel", "request_type": "Access", "sla_due": "2026-07-06", "daysLeft": 3 }
+  ]
+}</pre>
+    </div>
+  </div>
+
+  <h2><span class="num">4</span> Risks</h2>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/risks</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns all risks. Optional query parameter: <code>status</code> (e.g., <code>?status=Open</code>).</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="path">/risks</span>
+      <span class="badge owner">Owner</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Creates a new risk. The <code>score</code> field is auto-calculated by the database as <code>likelihood * impact</code>.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "title": "string", "description": "string", "likelihood": 4, "impact": 5 }</pre>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/risks/{risk_id}</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns a single risk with its full list of linked controls.</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method patch">PATCH</span>
+      <span class="path">/risks/{risk_id}</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Partially updates a risk. Accepts any subset of <code>title</code>, <code>description</code>, <code>likelihood</code>, <code>impact</code>, <code>status</code>.</p>
+      <p>Accepted status values: <code>Open</code>, <code>Mitigated</code>, <code>Accepted</code></p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="path">/risks/{risk_id}/link-control</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Links an existing control to a risk.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "control_id": "C01" }</pre>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method delete">DELETE</span>
+      <span class="path">/risks/{risk_id}/link-control/{control_id}</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Removes a control link from a risk.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">5</span> Controls</h2>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/controls</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns all controls including their dependency relationships. Optional query parameters: <code>status</code>, <code>owner_id</code>, <code>trust_criteria</code>.</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/controls/{control_id}</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns a single control with its linked risks, evidence artifacts, and dependency relationships.</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method patch">PATCH</span>
+      <span class="path">/controls/{control_id}</span>
+      <span class="badge owner">Owner</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Updates a control's <code>status</code> or <code>owner_id</code>.</p>
+      <p>Accepted status values: <code>Not Started</code>, <code>In Progress</code>, <code>Implemented</code>, <code>Verified</code></p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="path">/controls/{control_id}/link-dependency</span>
+      <span class="badge owner">Owner</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Creates a typed dependency relationship between two controls.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "related_control_id": "C02", "relationship": "supplements" }</pre>
+      <p>Accepted relationship values: <code>supplements</code>, <code>depends_on</code>, <code>replaces</code></p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method delete">DELETE</span>
+      <span class="path">/controls/{control_id}/link-dependency/{related_control_id}</span>
+      <span class="badge owner">Owner</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Removes a control dependency relationship.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">6</span> Evidence</h2>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/evidence</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns all evidence artifacts. Optional query parameters: <code>status</code>, <code>control_id</code>.</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="path">/evidence/controls/{control_id}/evidence</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Uploads an evidence artifact for a specific control. Accepts <code>multipart/form-data</code>. Provide either a <code>file</code> field (binary upload) or a <code>link_or_text</code> field (URL or text reference). Newly uploaded evidence defaults to <code>Pending Review</code> status.</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method patch">PATCH</span>
+      <span class="path">/evidence/{evidence_id}/review</span>
+      <span class="badge auditor">Auditor</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Sets the review outcome for an evidence artifact. Requires Admin or Auditor role.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "status": "Rejected", "rejection_reason": "Scan report is from a development environment." }</pre>
+      <p>Accepted status values: <code>Approved</code>, <code>Rejected</code>, <code>Needs Resubmission</code></p>
+      <p>The <code>rejection_reason</code> field is stored and surfaced in all subsequent responses.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">7</span> DPDP</h2>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/dpdp/requests</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns all data principal requests ordered by ascending SLA due date (most urgent first).</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="path">/dpdp/requests</span>
+      <span class="badge admin">Admin</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Logs a new data principal request. The SLA due date is automatically calculated as <code>received_on + 30 days</code> in accordance with DPDP Act timelines. Status defaults to <code>Open</code>.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "request_type": "Erasure", "data_principal_name": "Ananya Rao", "received_on": "2026-07-01" }</pre>
+      <p>Accepted request_type values: <code>Access</code>, <code>Erasure</code>, <code>Correction</code></p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method patch">PATCH</span>
+      <span class="path">/dpdp/requests/{request_id}</span>
+      <span class="badge admin">Admin</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Updates a request's status, assignee, or rejection reason. Auditors cannot be assigned to <code>Erasure</code> type requests. When setting status to <code>Rejected</code>, the <code>rejection_reason</code> field must be provided.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "status": "Rejected", "assigned_to": "user-admin", "rejection_reason": "Request falls outside DPDP exemption criteria." }</pre>
+      <p>Accepted status values: <code>Open</code>, <code>In Progress</code>, <code>Completed</code>, <code>Rejected</code></p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/dpdp/consent-log</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns all consent log entries ordered by descending timestamp.</p>
+    </div>
+  </div>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method post">POST</span>
+      <span class="path">/dpdp/consent-log</span>
+      <span class="badge admin">Admin</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Records a new consent declaration for a data principal.</p>
+      <p class="label">Request Body</p>
+      <pre>{ "data_principal_name": "Sneha Reddy", "purpose": "Newsletter Subscription Emails", "consent_status": "Given" }</pre>
+      <p>Accepted consent_status values: <code>Given</code>, <code>Withdrawn</code>, <code>Pending</code></p>
+    </div>
+  </div>
+
+  <h2><span class="num">8</span> Activity Log</h2>
+
+  <div class="endpoint-block">
+    <div class="endpoint-header">
+      <span class="method get">GET</span>
+      <span class="path">/activity-log</span>
+      <span class="badge all">All Roles</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns system activity log entries in descending chronological order. This endpoint is read-only. Entries are written automatically by the backend on every state-changing operation.</p>
+      <p>Optional query parameters:</p>
+      <table>
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>entity_type</td><td>string</td><td>Filter by module, e.g. Risk, Evidence, DPDP Request</td></tr>
+          <tr><td>entity_id</td><td>string</td><td>Filter by a specific record ID</td></tr>
+          <tr><td>limit</td><td>integer</td><td>Maximum number of results, defaults to 50</td></tr>
+        </tbody>
+      </table>
+      <p class="label">Response (example entry)</p>
+      <pre>{
+  "id": "ACT-4F2A1B",
+  "entity_type": "Evidence",
+  "entity_id": "E03",
+  "action": "Reviewed evidence: Rejected",
+  "actor_id": "user-auditor",
+  "actor_name": "Meera Iyer",
+  "timestamp": "2026-07-01T09:42:17"
+}</pre>
+    </div>
+  </div>
+
+</div>
+
+<button class="no-print" onclick="window.print()">Save as PDF</button>
+</body>
+</html>
