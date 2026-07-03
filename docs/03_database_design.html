@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Database Design | ComplianceOS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.7;
+      color: #1a1a2e;
+      background: #fff;
+    }
+
+    @page { size: A4; margin: 20mm 18mm; }
+    @media print {
+      .no-print { display: none; }
+      section { page-break-inside: avoid; }
+      h2 { page-break-before: always; }
+      h2:first-of-type { page-break-before: avoid; }
+      .table-section { page-break-inside: avoid; }
+    }
+
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #064e3b;
+      color: #fff;
+      padding: 60px;
+      page-break-after: always;
+    }
+
+    .cover .tag {
+      font-size: 9pt;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #6ee7b7;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .cover h1 {
+      font-size: 32pt;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .cover .subtitle {
+      font-size: 14pt;
+      color: #a7f3d0;
+      margin-bottom: 48px;
+    }
+
+    .cover .meta-block {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .cover .meta-item label {
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #6ee7b7;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cover .meta-item span { font-size: 10pt; color: #e2e8f0; }
+
+    .content { padding: 48px 60px; }
+
+    h2 {
+      font-size: 15pt;
+      font-weight: 700;
+      color: #064e3b;
+      margin: 40px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #059669;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .num {
+      background: #059669;
+      color: #fff;
+      font-size: 9pt;
+      font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 11.5pt;
+      font-weight: 700;
+      color: #064e3b;
+      margin: 28px 0 10px;
+      font-family: 'JetBrains Mono', monospace;
+      background: #f0fdf4;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border-left: 4px solid #059669;
+    }
+
+    p { margin-bottom: 10px; color: #374151; }
+    ul { margin: 8px 0 12px 20px; color: #374151; }
+    li { margin-bottom: 5px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 24px;
+      font-size: 9.5pt;
+    }
+
+    th {
+      background: #064e3b;
+      color: #fff;
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: #f0fdf4; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      background: #f0fdf4;
+      color: #065f46;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    pre {
+      background: #1e2022;
+      color: #86efac;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 14px 0;
+      white-space: pre;
+      line-height: 1.7;
+    }
+
+    .toc {
+      background: #f0fdf4;
+      border: 1px solid #d1fae5;
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin: 24px 0 40px;
+    }
+
+    .toc h3 {
+      margin: 0 0 14px;
+      color: #064e3b;
+      font-size: 10pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Inter', sans-serif;
+      background: none;
+      padding: 0;
+      border: none;
+    }
+
+    .toc ol { margin: 0 0 0 16px; }
+    .toc li { color: #047857; font-size: 10pt; }
+
+    .callout {
+      background: #f0fdf4;
+      border-left: 4px solid #059669;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout strong { color: #064e3b; display: block; margin-bottom: 4px; font-size: 9pt; text-transform: uppercase; letter-spacing: 1px; }
+
+    .pk { color: #d97706; font-weight: 600; font-size: 8.5pt; }
+    .fk { color: #7c3aed; font-weight: 600; font-size: 8.5pt; }
+    .gen { color: #059669; font-weight: 600; font-size: 8.5pt; }
+
+    .no-print {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #059669;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 10pt;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(5,150,105,0.4);
+    }
+  </style>
+</head>
+<body>
+
+<div class="cover">
+  <p class="tag">Hackathon Submission Document 3 of 3</p>
+  <h1>Database Design</h1>
+  <p class="subtitle">ComplianceOS: SOC 2 and DPDP Compliance Management Platform</p>
+  <div class="meta-block">
+    <div class="meta-item"><label>Team Name</label><span>Rajma Rockets</span></div>
+    <div class="meta-item"><label>Document Type</label><span>Database Design</span></div>
+    <div class="meta-item"><label>Member 1</label><span>Ayushmaan Sinha ayushmaansinha@gmail.com</span></div>
+    <div class="meta-item"><label>Member 2</label><span>Rishon Mukherjee rishonmukherjee@gmail.com</span></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li>Overview</li>
+      <li>Entity Relationship Diagram</li>
+      <li>Table: users</li>
+      <li>Table: risks</li>
+      <li>Table: controls</li>
+      <li>Table: risk_control_links</li>
+      <li>Table: evidence</li>
+      <li>Table: dpdp_requests</li>
+      <li>Table: consent_log</li>
+      <li>Table: control_dependencies</li>
+      <li>Table: activity_log</li>
+      <li>Business Rules &amp; Constraints</li>
+      <li>Risk Severity Classification</li>
+      <li>ID Generation Strategy</li>
+    </ol>
+  </div>
+
+  <h2><span class="num">1</span> Overview</h2>
+  <p>ComplianceOS uses SQLite 3 as its persistence layer. The database consists of 8 normalized tables, designed to capture the full lifecycle of a compliance program including risk identification, control implementation, evidence collection, data principal rights management, and an immutable audit trail.</p>
+  <p>The schema is defined in <code>server/src/db/schema.sql</code> and initialized on application startup. Demo data is seeded via <code>server/src/db/seed.py</code>, which drops and recreates the database to ensure a clean, consistent state for each deployment.</p>
+
+  <div class="callout">
+    <strong>ID Format</strong>
+    All primary keys are human-readable prefixed strings generated at the application layer using the first 6 characters of a UUID hex string. Examples: <code>R-4F2A1B</code> for a risk, <code>E-9C3D7A</code> for an evidence artifact, <code>ACT-88B2F1</code> for an activity log entry.
+  </div>
+
+  <h2><span class="num">2</span> Entity Relationship Diagram</h2>
+  <pre>
+  users (id, name, role)
+     |                  |
+     | owner_id         | assigned_to
+     v                  v
+  controls          dpdp_requests
+     |
+     |--< risk_control_links >-- risks
+     |
+     |--< evidence
+     |
+     |--< control_dependencies (self-referential)
+
+  consent_log  (independent, references data_principal_name only)
+
+  activity_log  (append-only, loosely references any entity via entity_type + entity_id)
+  </pre>
+
+  <h2><span class="num">3</span> Table: users</h2>
+  <p>Represents the three system personas. Populated during seeding and used as foreign key targets by controls, evidence, and dpdp_requests.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>TEXT</td><td><span class="pk">PK</span></td><td>NOT NULL</td></tr>
+      <tr><td>name</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>role</td><td>TEXT</td><td></td><td>NOT NULL, CHECK IN ('admin', 'owner', 'auditor')</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Seed values:</strong></p>
+  <table>
+    <thead><tr><th>id</th><th>name</th><th>role</th></tr></thead>
+    <tbody>
+      <tr><td>user-admin</td><td>Priya Sharma</td><td>admin</td></tr>
+      <tr><td>user-owner</td><td>Arjun Mehta</td><td>owner</td></tr>
+      <tr><td>user-auditor</td><td>Meera Iyer</td><td>auditor</td></tr>
+      <tr><td>user-dpo</td><td>Rohan Das</td><td>owner</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">4</span> Table: risks</h2>
+  <p>Stores identified organizational risks. The <code>score</code> column is a SQLite generated column, computed automatically as the product of <code>likelihood</code> and <code>impact</code>.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint / Default</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>TEXT</td><td><span class="pk">PK</span></td><td>NOT NULL</td></tr>
+      <tr><td>title</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>description</td><td>TEXT</td><td></td><td>nullable</td></tr>
+      <tr><td>likelihood</td><td>INTEGER</td><td></td><td>NOT NULL, CHECK BETWEEN 1 AND 5</td></tr>
+      <tr><td>impact</td><td>INTEGER</td><td></td><td>NOT NULL, CHECK BETWEEN 1 AND 5</td></tr>
+      <tr><td>score</td><td>INTEGER</td><td><span class="gen">GEN</span></td><td>GENERATED ALWAYS AS (likelihood * impact) STORED</td></tr>
+      <tr><td>status</td><td>TEXT</td><td></td><td>DEFAULT 'Open', CHECK IN ('Open', 'Mitigated', 'Accepted')</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td></td><td>DEFAULT CURRENT_TIMESTAMP</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">5</span> Table: controls</h2>
+  <p>Stores SOC 2 Trust Services Controls assigned to system users.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint / Default</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>TEXT</td><td><span class="pk">PK</span></td><td>NOT NULL</td></tr>
+      <tr><td>name</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>trust_criteria</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>description</td><td>TEXT</td><td></td><td>nullable</td></tr>
+      <tr><td>status</td><td>TEXT</td><td></td><td>CHECK IN ('Not Started', 'In Progress', 'Implemented', 'Verified')</td></tr>
+      <tr><td>owner_id</td><td>TEXT</td><td><span class="fk">FK</span></td><td>REFERENCES users(id)</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">6</span> Table: risk_control_links</h2>
+  <p>Junction table establishing the many-to-many relationship between risks and controls. A single risk may be mitigated by multiple controls, and a single control may address multiple risks.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint</th></tr></thead>
+    <tbody>
+      <tr><td>risk_id</td><td>TEXT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>REFERENCES risks(id)</td></tr>
+      <tr><td>control_id</td><td>TEXT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>REFERENCES controls(id)</td></tr>
+    </tbody>
+  </table>
+  <p>The composite primary key (risk_id, control_id) prevents duplicate links.</p>
+
+  <h2><span class="num">7</span> Table: evidence</h2>
+  <p>Stores compliance evidence artifacts submitted by owners and reviewed by auditors. Supports both file uploads (served from the <code>/uploads</code> directory) and URL or text references.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint / Default</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>TEXT</td><td><span class="pk">PK</span></td><td>NOT NULL</td></tr>
+      <tr><td>control_id</td><td>TEXT</td><td><span class="fk">FK</span></td><td>NOT NULL, REFERENCES controls(id)</td></tr>
+      <tr><td>file_url_or_text</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>status</td><td>TEXT</td><td></td><td>DEFAULT 'Pending Review', CHECK IN ('Pending Review', 'Approved', 'Rejected', 'Needs Resubmission')</td></tr>
+      <tr><td>uploaded_by</td><td>TEXT</td><td><span class="fk">FK</span></td><td>REFERENCES users(id)</td></tr>
+      <tr><td>reviewed_by</td><td>TEXT</td><td><span class="fk">FK</span></td><td>REFERENCES users(id), nullable</td></tr>
+      <tr><td>rejection_reason</td><td>TEXT</td><td></td><td>nullable, populated when status is Rejected or Needs Resubmission</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td></td><td>DEFAULT CURRENT_TIMESTAMP</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">8</span> Table: dpdp_requests</h2>
+  <p>Tracks data principal rights requests received under the DPDP Act, 2023. SLA due dates are calculated at the application layer as <code>received_on + 30 days</code>.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint / Default</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>TEXT</td><td><span class="pk">PK</span></td><td>NOT NULL</td></tr>
+      <tr><td>request_type</td><td>TEXT</td><td></td><td>NOT NULL, CHECK IN ('Access', 'Erasure', 'Correction')</td></tr>
+      <tr><td>data_principal_name</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>status</td><td>TEXT</td><td></td><td>DEFAULT 'Open', CHECK IN ('Open', 'In Progress', 'Completed', 'Rejected')</td></tr>
+      <tr><td>received_on</td><td>DATE</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>sla_due</td><td>DATE</td><td></td><td>NOT NULL, set to received_on + 30 days</td></tr>
+      <tr><td>assigned_to</td><td>TEXT</td><td><span class="fk">FK</span></td><td>REFERENCES users(id), nullable</td></tr>
+      <tr><td>rejection_reason</td><td>TEXT</td><td></td><td>nullable, required when status is set to Rejected</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">9</span> Table: consent_log</h2>
+  <p>Records consent declarations from data principals for specific data processing purposes.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint / Default</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>TEXT</td><td><span class="pk">PK</span></td><td>NOT NULL</td></tr>
+      <tr><td>data_principal_name</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>purpose</td><td>TEXT</td><td></td><td>NOT NULL</td></tr>
+      <tr><td>consent_status</td><td>TEXT</td><td></td><td>NOT NULL, CHECK IN ('Given', 'Withdrawn', 'Pending')</td></tr>
+      <tr><td>timestamp</td><td>DATETIME</td><td></td><td>DEFAULT CURRENT_TIMESTAMP</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">10</span> Table: control_dependencies</h2>
+  <p>Self-referential junction table representing typed relationships between controls. Allows modeling of real-world interdependencies such as one control supplementing another or depending on a prerequisite control.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint</th></tr></thead>
+    <tbody>
+      <tr><td>source_control_id</td><td>TEXT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>REFERENCES controls(id)</td></tr>
+      <tr><td>related_control_id</td><td>TEXT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>REFERENCES controls(id)</td></tr>
+      <tr><td>relationship</td><td>TEXT</td><td></td><td>NOT NULL, CHECK IN ('supplements', 'depends_on', 'replaces')</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Seeded relationships:</strong></p>
+  <table>
+    <thead><tr><th>Source</th><th>Related</th><th>Relationship</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td>C01</td><td>C02</td><td>supplements</td><td>Logical Access supplemented by MFA</td></tr>
+      <tr><td>C03</td><td>C04</td><td>supplements</td><td>Encryption at Rest supplemented by Encryption in Transit</td></tr>
+      <tr><td>C09</td><td>C10</td><td>depends_on</td><td>Backup and Recovery depends on Disaster Recovery Plan</td></tr>
+      <tr><td>C05</td><td>C06</td><td>supplements</td><td>Vulnerability Management supplemented by Incident Response</td></tr>
+      <tr><td>C11</td><td>C13</td><td>depends_on</td><td>Data Classification depends on Data Retention policy</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">11</span> Table: activity_log</h2>
+  <p>Append-only audit trail. Written by the <code>log_activity</code> helper within the same database transaction as the parent operation. Never written directly by route handlers. Never deleted or updated.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Constraint / Default</th></tr></thead>
+    <tbody>
+      <tr><td>id</td><td>TEXT</td><td><span class="pk">PK</span></td><td>NOT NULL, prefixed ACT-</td></tr>
+      <tr><td>entity_type</td><td>TEXT</td><td></td><td>NOT NULL, e.g. 'Risk', 'Evidence', 'DPDP Request'</td></tr>
+      <tr><td>entity_id</td><td>TEXT</td><td></td><td>NOT NULL, references the modified record's ID</td></tr>
+      <tr><td>action</td><td>TEXT</td><td></td><td>NOT NULL, human-readable description</td></tr>
+      <tr><td>actor_id</td><td>TEXT</td><td></td><td>nullable, the user who performed the action</td></tr>
+      <tr><td>actor_name</td><td>TEXT</td><td></td><td>nullable, display name captured at write time</td></tr>
+      <tr><td>timestamp</td><td>DATETIME</td><td></td><td>DEFAULT CURRENT_TIMESTAMP</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Design Note</strong>
+    The <code>entity_type</code> and <code>entity_id</code> columns act as a loose, polymorphic foreign key without a strict SQL constraint. This avoids join complexity and allows the log table to reference any entity across any table using a single unified schema.
+  </div>
+
+  <h2><span class="num">12</span> Business Rules and Constraints</h2>
+  <ul>
+    <li>A <code>dpdp_requests</code> record with <code>status = 'Rejected'</code> must have a non-null <code>rejection_reason</code>. This is enforced at the application layer before the UPDATE is executed.</li>
+    <li>An <code>evidence</code> record with <code>status = 'Rejected'</code> must have a documented <code>rejection_reason</code>. Enforced at the application layer.</li>
+    <li>A user with <code>role = 'auditor'</code> cannot be set as <code>assigned_to</code> for a <code>dpdp_requests</code> record where <code>request_type = 'Erasure'</code>. Validated in the PATCH route handler before the UPDATE executes.</li>
+    <li>The composite primary keys on <code>risk_control_links</code> and <code>control_dependencies</code> prevent duplicate associations at the database level.</li>
+    <li>All <code>CHECK</code> constraints on enumerated TEXT fields (role, status, request_type, etc.) are enforced by SQLite at write time.</li>
+  </ul>
+
+  <h2><span class="num">13</span> Risk Severity Classification</h2>
+  <p>The dashboard query classifies open risks into severity tiers based on their computed score. These thresholds correspond to standard industry practice for a 5 by 5 risk matrix where maximum score is 25.</p>
+  <table>
+    <thead><tr><th>Score Range</th><th>Severity Tier</th><th>Rationale</th></tr></thead>
+    <tbody>
+      <tr><td>20 to 25</td><td>Critical</td><td>Highest likelihood combined with highest impact</td></tr>
+      <tr><td>15 to 19</td><td>High</td><td>High product of both dimensions</td></tr>
+      <tr><td>8 to 14</td><td>Medium</td><td>Moderate risk requiring monitoring</td></tr>
+      <tr><td>1 to 7</td><td>Low</td><td>Low combined likelihood and impact</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="num">14</span> ID Generation Strategy</h2>
+  <p>All record IDs are generated at the application layer using the Python <code>uuid</code> module. The format is a module-specific prefix concatenated with the first 6 hexadecimal characters of a UUID4, converted to uppercase. This provides sufficient uniqueness for demonstration scale while remaining human-readable in the UI and audit logs.</p>
+  <table>
+    <thead><tr><th>Table</th><th>Prefix</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>risks</td><td>R-</td><td>R-4F2A1B</td></tr>
+      <tr><td>controls</td><td>C</td><td>C01 (seeded manually with sequential IDs)</td></tr>
+      <tr><td>evidence</td><td>E-</td><td>E-9C3D7A</td></tr>
+      <tr><td>dpdp_requests</td><td>D-</td><td>D-3B8E2C</td></tr>
+      <tr><td>consent_log</td><td>CL-</td><td>CL-1A4F9D</td></tr>
+      <tr><td>activity_log</td><td>ACT-</td><td>ACT-88B2F1</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<button class="no-print" onclick="window.print()">Save as PDF</button>
+</body>
+</html>

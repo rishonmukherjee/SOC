@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture & Solution Design | ComplianceOS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.7;
+      color: #1a1a2e;
+      background: #fff;
+      padding: 0;
+    }
+
+    @page {
+      size: A4;
+      margin: 20mm 18mm;
+    }
+
+    @media print {
+      .no-print {
+        display: none;
+      }
+
+      body {
+        padding: 0;
+      }
+
+      section {
+        page-break-inside: avoid;
+      }
+
+      h2 {
+        page-break-before: always;
+      }
+
+      h2:first-of-type {
+        page-break-before: avoid;
+      }
+    }
+
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #064e3b;
+      color: #fff;
+      padding: 60px 60px;
+      page-break-after: always;
+    }
+
+    .cover .tag {
+      font-size: 9pt;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #6ee7b7;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .cover h1 {
+      font-size: 32pt;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .cover .subtitle {
+      font-size: 14pt;
+      color: #a7f3d0;
+      margin-bottom: 48px;
+    }
+
+    .cover .meta-block {
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .cover .meta-item label {
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #6ee7b7;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .cover .meta-item span {
+      font-size: 10pt;
+      color: #e2e8f0;
+    }
+
+    .content {
+      padding: 48px 60px;
+    }
+
+    h2 {
+      font-size: 16pt;
+      font-weight: 700;
+      color: #064e3b;
+      margin: 40px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #059669;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 .num {
+      background: #059669;
+      color: #fff;
+      font-size: 9pt;
+      font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 11.5pt;
+      font-weight: 600;
+      color: #065f46;
+      margin: 22px 0 8px;
+    }
+
+    p {
+      margin-bottom: 10px;
+      color: #374151;
+    }
+
+    ul,
+    ol {
+      margin: 8px 0 12px 20px;
+      color: #374151;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px;
+      font-size: 9.5pt;
+    }
+
+    th {
+      background: #064e3b;
+      color: #fff;
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f0fdf4;
+    }
+
+    .callout {
+      background: #f0fdf4;
+      border-left: 4px solid #059669;
+      padding: 14px 18px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout strong {
+      color: #064e3b;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    pre {
+      background: #1e2022;
+      color: #86efac;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 12px 0;
+      white-space: pre;
+      line-height: 1.6;
+    }
+
+    .toc {
+      background: #f0fdf4;
+      border: 1px solid #d1fae5;
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin: 24px 0 40px;
+    }
+
+    .toc h3 {
+      margin: 0 0 14px;
+      color: #065f46;
+      font-size: 10pt;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .toc ol {
+      margin: 0 0 0 16px;
+    }
+
+    .toc li {
+      color: #047857;
+      font-size: 10pt;
+    }
+
+    .no-print {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #059669;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 10pt;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="cover">
+    <p class="tag">Hackathon Submission Document 1 of 3</p>
+    <h1>Architecture &amp; Solution Design</h1>
+    <p class="subtitle">ComplianceOS: SOC 2 and DPDP Compliance Management Platform</p>
+    <div class="meta-block">
+      <div class="meta-item"><label>Team Name</label><span>Rajma Rockets</span></div>
+      <div class="meta-item"><label>Document Type</label><span>Architecture &amp; Solution Design</span></div>
+      <div class="meta-item"><label>Member 1</label><span>Ayushmaan Sinha ayushmaansinha@gmail.com</span></div>
+      <div class="meta-item"><label>Member 2</label><span>Rishon Mukherjee rishonmukherjee@gmail.com</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="toc">
+      <h3>Contents</h3>
+      <ol>
+        <li>Project Overview</li>
+        <li>Problem Statement</li>
+        <li>Solution Design</li>
+        <li>Architecture Overview</li>
+        <li>Technology Stack</li>
+        <li>Repository Structure</li>
+        <li>Request Lifecycle</li>
+        <li>Authentication Model</li>
+        <li>Key Design Decisions</li>
+      </ol>
+    </div>
+
+    <h2><span class="num">1</span> Project Overview</h2>
+    <p>ComplianceOS is a full-stack compliance management platform addressing two converging regulatory requirements for
+      modern Indian organizations: the SOC 2 Trust Services Criteria framework and the Digital Personal Data Protection
+      (DPDP) Act, 2023.</p>
+    <p>The platform provides a centralized, role-governed interface for managing organizational risks, security
+      controls, compliance evidence, and data principal rights requests. It maintains a timestamped, append-only
+      activity audit trail for every mutation across all modules.</p>
+
+    <h2><span class="num">2</span> Problem Statement</h2>
+    <p>Organizations pursuing SOC 2 compliance or subject to the DPDP Act face several operational challenges:</p>
+    <ul>
+      <li>Compliance tracking is fragmented across spreadsheets, emails, and disconnected tools.</li>
+      <li>There is no formal, auditable workflow for DPDP data principal rights requests such as Access, Erasure, or
+        Correction.</li>
+      <li>Evidence chains linking identified risks to mitigating controls to proof of implementation are not maintained.
+      </li>
+      <li>Data erasure rejections lack documented justifications, exposing organizations to regulatory risk.</li>
+      <li>Role-based access is not enforced, allowing inappropriate actions by non-privileged users.</li>
+    </ul>
+
+    <h2><span class="num">3</span> Solution Design</h2>
+
+    <h3>Dashboard</h3>
+    <p>The executive dashboard aggregates real-time metrics: percentage of controls implemented, open risks categorized
+      by severity, evidence artifacts pending review, and DPDP requests with SLA deadlines approaching within 30 days.
+    </p>
+
+    <h3>Risk Register</h3>
+    <p>Administrators and owners log organizational risks with a title, description, likelihood (1 to 5), and impact (1
+      to 5). The risk score is calculated automatically by the database as the product of these two values. Risks can be
+      linked to mitigating controls and transition through statuses of Open, Mitigated, and Accepted.</p>
+
+    <h3>Controls Library</h3>
+    <p>SOC 2 controls are organized by Trust Services Criteria. Controls are assigned to owners and can be linked to
+      each other through typed dependency relationships to represent real-world interdependencies. Supported
+      relationship types are supplements and depends_on.</p>
+
+    <h3>Evidence Repository</h3>
+    <p>Provides a two-step upload and review workflow. An owner uploads a file or URL as evidence against a specific
+      control. An auditor or administrator then reviews the artifact and transitions its status. If the submission is
+      rejected or needs resubmission, a reason must be documented. Every state change is recorded to the audit log.</p>
+
+    <h3>DPDP Module</h3>
+    <p>Implements the data principal rights management workflow required under the DPDP Act, 2023. Administrators log
+      incoming requests, each receiving an SLA deadline of 30 days from the received date as specified by the Act. A
+      dedicated Consent Log sub-section tracks consent declarations for specific data processing purposes.</p>
+
+    <div class="callout">
+      <strong>Mandatory Rejection Justification</strong>
+      When a DPDP request is rejected, the platform requires the administrator to document a formal legal or operational
+      reason before the status change is saved. This satisfies the audit trail requirement for non-fulfillment of data
+      principal rights.
+    </div>
+
+    <h3>Activity Logs</h3>
+    <p>A read-only, append-only audit trail capturing every state change across all modules. Entries include entity
+      type, entity ID, action description, actor name, actor ID, and timestamp. Logs are filterable by module.</p>
+
+    <h2><span class="num">4</span> Architecture Overview</h2>
+    <p>ComplianceOS follows a decoupled client-server architecture. The frontend is a single-page React application
+      served from Vercel. The backend is a RESTful FastAPI application served from Render. The two communicate over
+      HTTPS, with the Vercel deployment proxy routing all API requests to the Render service, eliminating cross-origin
+      concerns.</p>
+
+    <pre>
+  [ Browser ]
+       |
+       | HTTPS
+       v
+  [ Vercel CDN ]
+  - Serves static React bundle
+  - Rewrites /api/* to Render backend
+       |
+       | HTTPS (proxied)
+       v
+  [ Render Web Service ]
+  - FastAPI application (Uvicorn)
+  - Role-based dependency injection
+  - Transactional activity logging
+       |
+       | SQLite driver
+       v
+  [ SQLite Database ]
+  - Single file: database.sqlite
+  - 8 normalized tables
+  - Generated columns for risk score
+  </pre>
+
+    <h2><span class="num">5</span> Technology Stack</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th>Technology</th>
+          <th>Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Frontend Framework</td>
+          <td>React 18 with Vite</td>
+          <td>Fast HMR, minimal configuration, standard choice for SPA development</td>
+        </tr>
+        <tr>
+          <td>Styling</td>
+          <td>Tailwind CSS</td>
+          <td>Utility-first, consistent design tokens, dark mode support</td>
+        </tr>
+        <tr>
+          <td>Routing</td>
+          <td>React Router v6</td>
+          <td>Declarative nested routing matching the dashboard layout</td>
+        </tr>
+        <tr>
+          <td>Icons</td>
+          <td>Lucide React</td>
+          <td>Consistent, lightweight SVG icon set</td>
+        </tr>
+        <tr>
+          <td>Backend Framework</td>
+          <td>FastAPI (Python 3.11)</td>
+          <td>Automatic OpenAPI docs, Pydantic validation, async-ready</td>
+        </tr>
+        <tr>
+          <td>ASGI Server</td>
+          <td>Uvicorn</td>
+          <td>High-performance, production-grade ASGI server for FastAPI</td>
+        </tr>
+        <tr>
+          <td>Database</td>
+          <td>SQLite 3</td>
+          <td>Zero-configuration, file-based, sufficient for demo scale</td>
+        </tr>
+        <tr>
+          <td>Frontend Deployment</td>
+          <td>Vercel</td>
+          <td>Instant global CDN, automatic CI from GitHub, free tier</td>
+        </tr>
+        <tr>
+          <td>Backend Deployment</td>
+          <td>Render</td>
+          <td>Managed container hosting with GitHub-connected auto-deploy</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2><span class="num">6</span> Repository Structure</h2>
+    <pre>
+SOC/
+  client/
+    src/
+      components/      Badge, Table, Modal, StatCard, Sidebar, Header
+      hooks/           useRole (session management)
+      layouts/         DashboardLayout
+      lib/
+        api.js         Centralized fetch layer for all backend calls
+      pages/           DashboardPage, RisksPage, ControlsPage,
+                       EvidencePage, DPDPPage, ActivityLogPage
+    vercel.json        Deployment and API proxy rewrites
+  server/
+    src/
+      db/
+        schema.sql     DDL for all 8 database tables
+        database.py    SQLite connection factory and init
+        seed.py        Demo data population script
+      routers/         risks.py, controls.py, evidence.py,
+                       dpdp.py, activity_log.py, dashboard.py, auth.py
+      utils/
+        activity_logger.py   Shared audit log helper
+      dependencies.py  Shared FastAPI dependencies (auth, role)
+      main.py          App entrypoint, CORS, router registration
+    start.sh           Render startup: init, seed, serve
+  README.MD            Full project documentation
+  </pre>
+
+    <h2><span class="num">7</span> Request Lifecycle</h2>
+    <p>A typical state-changing API request follows this path through the system:</p>
+    <ol>
+      <li>The React page calls a function in <code>api.js</code>.</li>
+      <li>The function attaches <code>X-User-Id</code> and <code>X-Role</code> headers from localStorage and calls
+        <code>fetch</code> against <code>/api/v1/...</code>.
+      </li>
+      <li>Vercel's rewrite rule proxies the request to the Render service URL.</li>
+      <li>FastAPI's <code>get_current_user</code> dependency resolves the headers into a typed <code>User</code> object.
+      </li>
+      <li>The route handler performs authorization checks, executes the SQL mutation, and calls
+        <code>log_activity</code>.
+      </li>
+      <li>The parent handler commits the transaction, atomically persisting both the data change and the audit log
+        entry.</li>
+      <li>The response is serialized through a Pydantic response model and returned as JSON.</li>
+    </ol>
+
+    <h2><span class="num">8</span> Authentication Model</h2>
+    <p>ComplianceOS uses a header-based session model. Upon login, the backend returns a user payload containing the
+      user ID, display name, and role. The frontend stores this payload in localStorage. Every subsequent API call reads
+      this stored payload and attaches it as HTTP request headers.</p>
+    <p>The backend's <code>get_current_user</code> FastAPI dependency reads these headers on every request and
+      constructs a <code>User</code> object that is injected into route handlers. Route handlers then perform
+      authorization checks against this object.</p>
+    <p>A quick role switcher in the application header allows instant context switching between the Admin, Owner, and
+      Auditor personas for demonstration purposes, making it straightforward to showcase role-differentiated views and
+      permissions.</p>
+
+    <h2><span class="num">9</span> Key Design Decisions</h2>
+
+    <h3>Transactional Activity Logging</h3>
+    <p>The <code>log_activity</code> helper does not issue a database commit. It writes within the same open database
+      connection as the parent operation. The parent route handler commits both the data change and the audit log entry
+      in a single transaction, guaranteeing that the audit trail is never out of sync with the data it describes. Log
+      write failures are swallowed to prevent a logging issue from rolling back real data.</p>
+
+    <h3>Mandatory Rejection Documentation</h3>
+    <p>Both the Evidence review and DPDP rejection workflows require a documented reason. This is enforced at the
+      frontend before the API call is made, and the field is stored and returned in all subsequent responses. This
+      creates a durable, retrievable audit record for every rejection decision.</p>
+
+    <h3>Auditor Restrictions on Erasure Requests</h3>
+    <p>The API layer validates that auditors cannot be assigned as the responsible party for Erasure type DPDP requests.
+      Erasure requests carry the highest legal risk and require a privileged decision-maker. This rule is enforced
+      server-side to prevent bypass through direct API calls.</p>
+
+    <h3>SQLite Generated Column for Risk Score</h3>
+    <p>The risk score is declared as a SQLite <code>GENERATED ALWAYS AS (likelihood * impact) STORED</code> column. This
+      eliminates any possibility of the score being out of sync with the underlying values, removes the need for
+      application-layer calculation logic, and allows the dashboard to query scores directly in SQL without
+      post-processing.</p>
+
+  </div>
+
+  <button class="no-print" onclick="window.print()">Save as PDF</button>
+</body>
+
+</html>
