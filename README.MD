@@ -28,6 +28,17 @@ Organizations pursuing SOC 2 certification or subject to the DPDP Act face a com
 - There is no formal, auditable workflow for handling data principal rights requests (Access, Erasure, Correction) within the 30-day SLA mandated by the DPDP Act.
 - Evidence chains linking identified risks to mitigating controls to proof of implementation are not maintained, making audit preparation time-consuming and error-prone.
 - When a data principal request or evidence submission is rejected, there is no mechanism to document the justification, exposing the organization to regulatory risk.
+- Controls are treated as isolated checkboxes with no visibility into how one control's failure cascades to others, making it impossible to assess systemic risk during an audit.
+
+---
+
+## What Sets ComplianceOS Apart
+
+**Control-to-Control Dependency Mapping.** Most compliance tools treat controls as a flat checklist. In reality, controls are interdependent. A failed Disaster Recovery Plan renders a Backup and Recovery control incomplete. An MFA implementation supplements, but does not replace, Logical Access Controls. ComplianceOS models these relationships explicitly through typed dependency links (supplements, depends_on, replaces) between controls. This gives compliance teams and auditors a clear picture of how control failures propagate and which controls are prerequisites for others, turning a static checklist into a dependency-aware compliance graph.
+
+**Mandatory Rejection Audit Trail.** Under the DPDP Act, rejecting a data principal's request without documented justification is a regulatory violation. ComplianceOS enforces documented rejection reasons at both the UI and API layers for DPDP requests and evidence reviews, ensuring every rejection is defensible.
+
+**Unified SOC 2 and DPDP Workflow.** Rather than requiring separate tools for SOC 2 readiness and DPDP compliance, ComplianceOS integrates both frameworks into a single platform with shared activity logging, role-based access, and a common evidence chain.
 
 ---
 
@@ -37,7 +48,13 @@ Organizations pursuing SOC 2 certification or subject to the DPDP Act face a com
 Log and score organizational risks using a 5x5 likelihood-impact matrix. Risk scores are auto-calculated at the database level. Link risks to one or more mitigating controls to build a traceable risk-to-control mapping.
 
 ### Controls Library
-Manage SOC 2 controls organized by Trust Services Criteria (Security, Availability, Confidentiality). Assign control owners, track implementation status through four stages (Not Started, In Progress, Implemented, Verified), and define typed dependencies between controls (supplements, depends_on, replaces).
+Manage SOC 2 controls organized by Trust Services Criteria (Security, Availability, Confidentiality). Assign control owners and track implementation status through four stages (Not Started, In Progress, Implemented, Verified). Controls can be linked to other controls through typed dependency relationships:
+
+- **supplements**: One control strengthens another (e.g., MFA supplements Logical Access Controls).
+- **depends_on**: One control cannot be verified without another being in place first (e.g., Backup and Recovery depends on a Disaster Recovery Plan).
+- **replaces**: One control supersedes another.
+
+These dependency links surface cascading risks and prerequisite gaps that flat checklists cannot capture.
 
 ### Evidence Repository
 Upload files or reference links as evidence against specific controls. Evidence enters a formal review workflow where an auditor approves, rejects (with a mandatory documented reason), or requests resubmission. Every state transition is recorded to the audit log.
