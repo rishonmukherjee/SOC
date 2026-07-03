@@ -57,7 +57,8 @@ CREATE TABLE IF NOT EXISTS dpdp_requests (
     CHECK(status IN ('Open','In Progress','Completed','Rejected')),
   received_on DATE NOT NULL,
   sla_due DATE NOT NULL,  -- auto = received_on + 30 days
-  assigned_to TEXT REFERENCES users(id)
+  assigned_to TEXT REFERENCES users(id),
+  rejection_reason TEXT
 );
 
 -- Consent Log
