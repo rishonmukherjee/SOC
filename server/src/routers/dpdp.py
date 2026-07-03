@@ -21,6 +21,7 @@ class DPDPRequestCreate(BaseModel):
 class DPDPRequestUpdate(BaseModel):
     status: Optional[str] = None # 'Open', 'In Progress', 'Completed', 'Rejected'
     assigned_to: Optional[str] = None
+    rejection_reason: Optional[str] = None
 
 class DPDPRequestResponse(BaseModel):
     id: str
@@ -30,6 +31,7 @@ class DPDPRequestResponse(BaseModel):
     received_on: date
     sla_due: date
     assigned_to: Optional[str]
+    rejection_reason: Optional[str] = None
 
 class ConsentLogCreate(BaseModel):
     data_principal_name: str
