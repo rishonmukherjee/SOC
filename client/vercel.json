@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://YOUR_RENDER_URL.onrender.com/api/$1"
+      "destination": "https://soc-1t07.onrender.com/api/$1"
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "https://YOUR_RENDER_URL.onrender.com/uploads/$1"
+      "destination": "https://soc-1t07.onrender.com/uploads/$1"
     },
     {
       "source": "/(.*)",
