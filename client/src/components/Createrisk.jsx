@@ -31,7 +31,7 @@ function CreateRiskForm({ onSubmit }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
 
-      {/* Title */}
+
       <div>
         <label className="block text-sm text-gray-400 mb-2">
           Risk Title
@@ -46,7 +46,7 @@ function CreateRiskForm({ onSubmit }) {
         />
       </div>
 
-      {/* Description */}
+
       <div>
         <label className="block text-sm text-gray-400 mb-2">
           Description
@@ -61,7 +61,7 @@ function CreateRiskForm({ onSubmit }) {
         />
       </div>
 
-      {/* Likelihood */}
+
       <div>
         <label className="block text-sm text-gray-400 mb-2">
           Likelihood
@@ -82,7 +82,7 @@ function CreateRiskForm({ onSubmit }) {
         </p>
       </div>
 
-      {/* Impact */}
+
       <div>
         <label className="block text-sm text-gray-400 mb-2">
           Impact
@@ -103,7 +103,7 @@ function CreateRiskForm({ onSubmit }) {
         </p>
       </div>
 
-      {/* Status */}
+
       <div>
         <label className="block text-sm text-gray-400 mb-2">
           Status
@@ -121,7 +121,7 @@ function CreateRiskForm({ onSubmit }) {
         </select>
       </div>
 
-      {/* Score */}
+
       <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
 
         <p className="text-sm text-gray-400">

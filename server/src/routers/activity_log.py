@@ -25,6 +25,10 @@ def list_activity_logs(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
+    """
+    Retrieves system activity logs, optionally filtered by entity type or ID.
+    Results are ordered by descending timestamp.
+    """
     query = "SELECT * FROM activity_log WHERE 1=1"
     params = []
     

@@ -58,7 +58,7 @@ function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Header */}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold text-white tracking-tight">
@@ -85,7 +85,6 @@ function DashboardPage() {
         </div>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <StatCard
           title="Open Risks"
@@ -117,9 +116,7 @@ function DashboardPage() {
         />
       </div>
 
-      {/* Recent Activity + SLA Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Upcoming SLA Deadlines */}
         <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-6">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-semibold text-white">
@@ -169,7 +166,6 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Activity */}
         <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-6">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-semibold text-white">

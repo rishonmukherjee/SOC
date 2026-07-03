@@ -112,7 +112,7 @@ function EvidencePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header */}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-white tracking-tight">Evidence Repository</h2>
@@ -129,7 +129,7 @@ function EvidencePage() {
         </button>
       </div>
 
-      {/* Filters */}
+
       <div className="flex flex-wrap gap-4 items-center justify-between bg-gray-900/30 p-4 rounded-xl border border-gray-800/60 backdrop-blur-sm">
         <div className="relative group flex-1 max-w-md">
           <Search
@@ -164,7 +164,7 @@ function EvidencePage() {
         </div>
       </div>
 
-      {/* Loading & Error States */}
+
       {loading ? (
         <div className="flex h-[40vh] items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -264,7 +264,7 @@ function EvidencePage() {
         </Table>
       )}
 
-      {/* Upload Evidence Modal */}
+
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Upload Evidence">
         <form onSubmit={handleUploadSubmit} className="space-y-4">
           <div>

@@ -28,7 +28,11 @@ def get_dashboard_summary(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # 1. Controls counts
+    """
+    Aggregates metrics for the executive dashboard.
+    Returns control compliance percentages, open risk severities,
+    pending evidence counts, and upcoming DPDP SLA deadlines.
+    """
     cursor = db.execute("SELECT status, COUNT(*) as count FROM controls GROUP BY status")
     controls_rows = cursor.fetchall()
     
@@ -54,8 +58,6 @@ def get_dashboard_summary(
     if controlsTotal > 0:
         controlsImplementedPct = int((implemented_or_verified_count / controlsTotal) * 100)
         
-    # 2. Open Risks by Severity (auto-calculated score)
-    # 20-25 = Critical, 15-19 = High, 8-14 = Medium, 1-7 = Low
     cursor = db.execute("SELECT score FROM risks WHERE status = 'Open'")
     risk_rows = cursor.fetchall()
     
@@ -77,12 +79,9 @@ def get_dashboard_summary(
         else:
             openRisksBySeverity["Low"] += 1
             
-    # 3. Evidence Pending Count
     cursor = db.execute("SELECT COUNT(*) as count FROM evidence WHERE status = 'Pending Review'")
     evidencePendingCount = cursor.fetchone()["count"]
     
-    # 4. DPDP Requests Due Soon (Next 30 days)
-    # In SQLite, we can use julianday to calculate date differences
     cursor = db.execute(
         """
         SELECT id, data_principal_name, request_type, sla_due, 

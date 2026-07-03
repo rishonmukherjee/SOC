@@ -53,7 +53,7 @@ function StatCard({
   return (
     <div className="group relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900/40 p-6 backdrop-blur-sm transition-all duration-200 hover:border-gray-700 hover:bg-gray-900/60">
       
-      {/* Accent Line */}
+
       <span
         className={`absolute inset-x-0 top-0 h-[2px] ${c.accent} opacity-70`}
       />

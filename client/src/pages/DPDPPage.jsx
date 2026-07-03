@@ -142,7 +142,7 @@ function DPDPPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header */}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-white tracking-tight">DPDP Module</h2>
@@ -169,7 +169,7 @@ function DPDPPage() {
         )}
       </div>
 
-      {/* Tabs */}
+
       <div className="flex gap-4 border-b border-gray-800 pb-1">
         <button
           className={`px-4 py-2 text-sm font-medium transition-all border-b-2 ${
@@ -193,7 +193,7 @@ function DPDPPage() {
         </button>
       </div>
 
-      {/* Filters & Toggles */}
+
       {activeTab === "requests" && (
         <div className="flex items-center justify-between bg-gray-900/30 p-4 rounded-xl border border-gray-800/60 backdrop-blur-sm">
           <div className="text-sm text-gray-400">
@@ -214,7 +214,7 @@ function DPDPPage() {
         </div>
       )}
 
-      {/* Loading & Error States */}
+
       {loading ? (
         <div className="flex h-[40vh] items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -344,7 +344,7 @@ function DPDPPage() {
         </Table>
       )}
 
-      {/* Log Request Modal */}
+
       <Modal isOpen={requestModalOpen} onClose={() => setRequestModalOpen(false)} title="Log DPDP Request">
         <form onSubmit={handleRequestSubmit} className="space-y-4">
           <div>
@@ -396,7 +396,7 @@ function DPDPPage() {
         </form>
       </Modal>
 
-      {/* Record Consent Modal */}
+
       <Modal isOpen={consentModalOpen} onClose={() => setConsentModalOpen(false)} title="Record Customer Consent">
         <form onSubmit={handleConsentSubmit} className="space-y-4">
           <div>

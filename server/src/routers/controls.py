@@ -9,7 +9,7 @@ from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
-# --- Pydantic Models ---
+
 
 class ControlUpdate(BaseModel):
     status: Optional[str] = None
@@ -37,7 +37,7 @@ class LinkControlDependencyRequest(BaseModel):
     related_control_id: str
     relationship: str # 'supplements', 'depends_on', 'replaces'
 
-# --- Routes ---
+
 
 @router.get("", response_model=List[ControlResponse])
 def list_controls(
@@ -63,7 +63,7 @@ def list_controls(
     cursor = db.execute(query, params)
     rows = cursor.fetchall()
     
-    # Fetch all dependencies and group by source_control_id
+    # Aggregate dependencies for all controls to minimize queries
     dep_cursor = db.execute(
         """
         SELECT cd.source_control_id, cd.related_control_id, c.name as related_control_name, cd.relationship
@@ -96,7 +96,7 @@ def get_control(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # Fetch control
+    # Fetch base control metadata
     cursor = db.execute("SELECT * FROM controls WHERE id = ?", (control_id,))
     control_row = cursor.fetchone()
     

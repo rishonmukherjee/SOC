@@ -11,7 +11,7 @@ from src.utils.activity_logger import log_activity
 
 router = APIRouter()
 
-# --- Pydantic Models ---
+
 
 class DPDPRequestCreate(BaseModel):
     request_type: str # 'Access', 'Erasure', 'Correction'
@@ -45,14 +45,14 @@ class ConsentLogResponse(BaseModel):
     consent_status: str
     timestamp: str
 
-# --- Routes ---
+
 
 @router.get("/requests", response_model=List[DPDPRequestResponse])
 def list_dpdp_requests(
     db: sqlite3.Connection = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # Sort by SLA due date ascending (closest deadline first)
+    """Retrieves all active DPDP data principal requests ordered by impending SLA deadlines."""
     cursor = db.execute("SELECT * FROM dpdp_requests ORDER BY sla_due ASC")
     rows = cursor.fetchall()
     return [dict(row) for row in rows]
@@ -72,7 +72,7 @@ def log_dpdp_request(
 
     request_id = f"D-{uuid.uuid4().hex[:6].upper()}"
     
-    # Calculate SLA due date (30 days from received date)
+    # SLA defaults to 30 days per DPDP guidelines
     sla_due = req.received_on + timedelta(days=30)
 
     try:
