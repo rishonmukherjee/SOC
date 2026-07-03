@@ -104,8 +104,19 @@ function DPDPPage() {
   };
 
   const handleStatusChange = async (requestId, newStatus) => {
+    let payload = { status: newStatus };
+    if (newStatus === "Rejected") {
+      const reason = prompt("Please enter a legal or operational reason for rejecting this DPDP request:");
+      if (reason === null) return; // user cancelled
+      if (!reason.trim()) {
+        alert("A rejection reason is explicitly required for compliance audit logs.");
+        return;
+      }
+      payload.rejection_reason = reason.trim();
+    }
+
     try {
-      await updateDpdpRequest(requestId, { status: newStatus });
+      await updateDpdpRequest(requestId, payload);
       fetchData();
     } catch (err) {
       alert("Failed to update status: " + err.message);
@@ -240,20 +251,31 @@ function DPDPPage() {
                   <td className="px-6 py-4 text-white font-medium">{req.data_principal_name}</td>
                   <td className="px-6 py-4 text-gray-300">{req.request_type}</td>
                   <td className="px-6 py-4">
-                    {role === "admin" ? (
-                      <select
-                        value={req.status}
-                        onChange={(e) => handleStatusChange(req.id, e.target.value)}
-                        className="bg-black border border-gray-800 text-gray-300 rounded px-2 py-1 text-xs cursor-pointer focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Rejected">Rejected</option>
-                      </select>
-                    ) : (
-                      <Badge status={req.status} />
-                    )}
+                    <div className="flex flex-col gap-1">
+                      {role === "admin" ? (
+                        <select
+                          value={req.status}
+                          onChange={(e) => handleStatusChange(req.id, e.target.value)}
+                          className="bg-black border border-gray-800 text-gray-300 rounded px-2 py-1 text-xs cursor-pointer focus:outline-none focus:border-blue-500 w-fit"
+                        >
+                          <option value="Open">Open</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+                      ) : (
+                        <Badge status={req.status} />
+                      )}
+                      {req.rejection_reason && (
+                        <button
+                          onClick={() => alert(`DPDP Rejection Reason:\n\n"${req.rejection_reason}"`)}
+                          className="text-[10px] text-red-400 hover:text-red-300 max-w-[150px] truncate block text-left underline decoration-dotted cursor-pointer mt-0.5"
+                          title="Click to view full rejection reason"
+                        >
+                          {req.rejection_reason}
+                        </button>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-gray-300">{req.received_on}</td>
                   <td className="px-6 py-4 text-gray-300">{req.sla_due}</td>
